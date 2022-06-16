@@ -1,3 +1,5 @@
+#include "options.h"
+
 int	ft_ping(int ac, char **av)
 {
 	(void)ac;
