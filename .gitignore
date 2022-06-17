@@ -1,1 +1,4 @@
 ft_ping
+obj/
+obj/*
+*.o
