@@ -3,5 +3,6 @@
 
 int		ft_ping(int ac, char **av);
 int		parse_ping_options(int ac, char **av, unsigned long long *opt);
+int		resolve_hostname(char *hostname);
 
 #endif

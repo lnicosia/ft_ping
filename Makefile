@@ -36,7 +36,7 @@ LDFLAGS = -L $(LIBFT_DIR)
 
 LIB_RAW = 
 
-SRC_RAW =	main.c ft_ping.c parse_option_line.c \
+SRC_RAW =	main.c ft_ping.c parse_option_line.c resolve_hostname.c \
 
 HEADERS =	options.h
 
