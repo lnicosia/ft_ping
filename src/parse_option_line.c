@@ -26,7 +26,7 @@ int		print_usage(void)
 	return (1);
 }
 
-int		check_opt(char *av, int *opt)
+int		check_opt(char *av, unsigned long long *opt)
 {
 	if (*av == 'h')
 		return print_usage_stdin();
@@ -42,7 +42,7 @@ int		check_opt(char *av, int *opt)
 	return (0);
 }
 
-int		parse_option_line(char *av, int *opt)
+int		parse_option_line(char *av, unsigned long long *opt)
 {
 	int	ret;
 
@@ -86,7 +86,7 @@ int		is_arg_an_option_line(char *av)
 **	Parse all the options by checking arguments starting with '-'
 */
 
-int		parse_nm_options(int ac, char **av, int *opt, int* nb_files)
+int		parse_ping_options(int ac, char **av, unsigned long long *opt)
 {
 	int	i;
 	int	ret;
@@ -99,8 +99,6 @@ int		parse_nm_options(int ac, char **av, int *opt, int* nb_files)
 			if ((ret = parse_option_line(av[i], opt)) != 0)
 				return (ret);
 		}
-		else
-			(*nb_files)++;
 		i++;
 	}
 	return (0);
