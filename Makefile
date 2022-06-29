@@ -37,8 +37,9 @@ LDFLAGS = -L $(LIBFT_DIR)
 LIB_RAW = 
 
 SRC_RAW =	main.c ft_ping.c parse_option_line.c resolve_hostname.c \
+			send_probes.c \
 
-HEADERS =	options.h
+HEADERS =	options.h ft_ping.h ip.h send_probes.h
 
 #
 # Creation of files path
