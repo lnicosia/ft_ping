@@ -59,8 +59,9 @@ OPTI_FLAGS = -O3
 CFLAGS =	-Wall -Wextra -Werror -Wpadded -Wconversion -I $(INCLUDES_DIR) \
 	  	-I $(LIBFT_DIR)/includes -I $(BMP_PARSER_DIR)/includes \
 		-I $(LIBMFT_DIR)/includes -I $(GLAD_DIR)/include \
-		$(OPTI_FLAGS) \
-		#-fsanitize=address -g3 \
+		-g3 \
+		#-fsanitize=address \
+		#$(OPTI_FLAGS) \
 		
 	
 #
