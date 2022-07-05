@@ -65,7 +65,7 @@ t_ip		resolve_hostname(char *hostname)
 	ft_bzero(&res, sizeof(res));
 	if (getaddrinfo(hostname, NULL, &hints, &ai))
 	{
-		dprintf(STDERR_FILENO, "ft_ping: %s: Name or service not known\n",
+		dprintf(STDERR_FILENO, "ft_ping: %s: Temporary failure in name resolution\n",
 			hostname);
 		free_and_exit_failure();
 	}

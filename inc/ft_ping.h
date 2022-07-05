@@ -16,6 +16,10 @@ typedef struct				s_global_data
 	char					*av;
 	t_ip					src_ip;
 	t_ip					dst_ip;
+	size_t					packets_transmitted;
+	size_t					packets_received;
+	size_t					ttl;
+	size_t					packet_size;
 }							t_global_data;
 
 EXTERN t_global_data		g_global_data;
