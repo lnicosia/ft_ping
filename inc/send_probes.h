@@ -3,6 +3,6 @@
 
 #include "ip.h"
 
-int		send_probes(int sckt, t_ip ip, unsigned long long opt);
+int		send_probes(int sckt, t_ip ip);
 
 #endif

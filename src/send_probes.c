@@ -1,6 +1,7 @@
 #include "libft.h"
 #include "ip.h"
 #include "options.h"
+#include "ft_ping.h"
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <stdio.h>
@@ -39,7 +40,7 @@ static int	ft_gethostname(char *name, size_t size)
 	return 0;
 }
 
-int	send_probes(int sckt, t_ip ip, unsigned long long opt)
+int	send_probes(int sckt, t_ip ip)
 {
 	char	out_buffer[400];
 	char	in_buffer[400];
@@ -58,17 +59,14 @@ int	send_probes(int sckt, t_ip ip, unsigned long long opt)
 	printf("Src IP:\n");
 	printf("Name = '%s'\n", src_name);
 	t_ip	src_ip = resolve_hostname(src_name);
-	if (opt & OPT_IP4)
+	if (g_global_data.opt & OPT_IP4)
 	{
 		ip_buffer->ip_src = src_ip.ip4.sin_addr;
 		ip_buffer->ip_dst = ip.ip4.sin_addr;
 		ip_buffer->ip_v = 4;
 	}
-	else if (opt & OPT_IP6)
+	else if (g_global_data.opt & OPT_IP6)
 	{
-		/*ip_buffer->ip_src = src_ip.ip6.sin6_addr;
-		ip_buffer->ip_dst = ip.ip6.sin6_addr;
-		ip_buffer->ip_v = 6;*/
 		printf("IPV6 not handled yet\n");
 		return 0;
 	}

@@ -1,5 +1,6 @@
 #include "options.h"
 #include "libft.h"
+#include "ft_ping.h"
 
 int		print_version(void)
 {
@@ -26,14 +27,14 @@ int		print_usage(void)
 	return (1);
 }
 
-int		check_opt(char *av, unsigned long long *opt)
+int		check_opt(char *av)
 {
 	if (*av == 'h')
 		return print_usage_stdin();
 	else if (*av == 'V')
 		return print_version();
 	else if (*av == 'v')
-		*opt |= OPT_VERBOSE;
+		g_global_data.opt |= OPT_VERBOSE;
 	else if (*av != 'e')
 	{
 		custom_error("ft_ping: invalid option -- '%s'\n", av);
@@ -42,14 +43,14 @@ int		check_opt(char *av, unsigned long long *opt)
 	return (0);
 }
 
-int		parse_option_line(char *av, unsigned long long *opt)
+int		parse_option_line(char *av)
 {
 	int	ret;
 
 	if (ft_strbegin(av, "--"))
 	{
 		if (ft_strequ(av, "--verbose"))
-			*opt |= OPT_VERBOSE;
+			g_global_data.opt |= OPT_VERBOSE;
 		else if (ft_strnequ(av, "--help", ft_strlen(av)))
 			return print_usage_stdin();
 		else if (ft_strnequ(av, "--version", ft_strlen(av)))
@@ -65,7 +66,7 @@ int		parse_option_line(char *av, unsigned long long *opt)
 		av++;
 		while (*av)
 		{
-			if ((ret = check_opt(av, opt)) != 0)
+			if ((ret = check_opt(av)) != 0)
 				return (ret);
 			av++;
 		}
@@ -86,7 +87,7 @@ int		is_arg_an_option_line(char *av)
 **	Parse all the options by checking arguments starting with '-'
 */
 
-int		parse_ping_options(int ac, char **av, unsigned long long *opt)
+int		parse_ping_options(int ac, char **av)
 {
 	int	i;
 	int	ret;
@@ -96,7 +97,7 @@ int		parse_ping_options(int ac, char **av, unsigned long long *opt)
 	{
 		if (is_arg_an_option_line(av[i]))
 		{
-			if ((ret = parse_option_line(av[i], opt)) != 0)
+			if ((ret = parse_option_line(av[i])) != 0)
 				return (ret);
 		}
 		i++;

@@ -1,8 +1,10 @@
-unsigned short	checksum(void *ptr, int len)
+#include <stdint.h>
+
+uint16_t	checksum(void *ptr, int len)
 {
-	unsigned short *buf = (unsigned short*)ptr;
-	unsigned int	sum = 0;
-	unsigned short	res = 0;
+	uint16_t *buf = (unsigned short*)ptr;
+	uint32_t	sum = 0;
+	uint16_t	res = 0;
 	
 	for ( ; len > 1 ; len -= 2)
 	{
@@ -10,9 +12,9 @@ unsigned short	checksum(void *ptr, int len)
 		buf++;
 	}
 	if (len == 1)
-		sum += *(unsigned char*)buf;
+		sum += *(uint8_t*)buf;
 	sum = (sum >> 16) + (sum & 0xFFFF);
 	sum += (sum >> 16);
-	res = (unsigned short)~sum;
+	res = (uint16_t)~sum;
 	return res;
 }
