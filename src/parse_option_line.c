@@ -1,29 +1,35 @@
 #include "options.h"
 #include "libft.h"
 #include "ft_ping.h"
+#include <stdio.h>
 
 int		print_version(void)
 {
-	ft_bprintf(0, "lnicosia's ft_ping version 1.0\n");
-	ft_bprintf(0, "This program is free software; you may redistribute it\n");
-	ft_bprintf(0, "This program has absolutely no warranty\n");
+	printf("lnicosia's ft_ping version 1.0\n");
+	printf("This program is free software; you may redistribute it\n");
+	printf("This program has absolutely no warranty\n");
 	return (2);
 }
 
 int		print_usage_stdin(void)
 {
-	ft_bprintf(0, "Usage: ft_ping [option(s)] [file(s)]\n");
-	ft_bprintf(0, " List symbols in [file(s)] (a.out by default).\n");
-	ft_bprintf(0, " The options are:\n");
-	ft_bprintf(0, "  -h, --help\t\tprint help and exit\n");
-	ft_bprintf(0, "  -v\t\t\terbose output\n");
-	ft_bprintf(0, "  -V, --version\t\tprint version and exit\n");
-	ft_bprintf(0, "Report bugs to <https://github.com/lnicosia/ft_nm>.\n");
+	printf("Usage: ft_ping [option(s)] [file(s)]\n");
+	printf(" List symbols in [file(s)] (a.out by default).\n");
+	printf(" The options are:\n");
+	printf("  -h, --help\t\tprint help and exit\n");
+	printf("  -v\t\t\terbose output\n");
+	printf("  -V, --version\t\tprint version and exit\n");
 	return (2);
 }
 
 int		print_usage(void)
 {
+	dprintf(STDERR_FILENO, "Usage: ft_ping [option(s)] [file(s)]\n");
+	dprintf(STDERR_FILENO, " List symbols in [file(s)] (a.out by default).\n");
+	dprintf(STDERR_FILENO, " The options are:\n");
+	dprintf(STDERR_FILENO, "  -h, --help\t\tprint help and exit\n");
+	dprintf(STDERR_FILENO, "  -v\t\t\terbose output\n");
+	dprintf(STDERR_FILENO, "  -V, --version\t\tprint version and exit\n");
 	return (1);
 }
 
@@ -37,7 +43,7 @@ int		check_opt(char *av)
 		g_global_data.opt |= OPT_VERBOSE;
 	else if (*av != 'e')
 	{
-		custom_error("ft_ping: invalid option -- '%s'\n", av);
+		dprintf(STDERR_FILENO, "ft_ping: invalid option -- '%s'\n", av);
 		return print_usage();
 	}
 	return (0);
@@ -57,8 +63,8 @@ int		parse_option_line(char *av)
 			return print_version();
 		else
 		{
-			custom_error("ft_ping: unrecognized option '%s'\n", av);
-			return (print_usage());
+			dprintf(STDERR_FILENO, "ft_ping: invalid option '%s'\n", av);
+			return print_usage();
 		}
 	}
 	else
@@ -100,7 +106,10 @@ int		parse_ping_options(int ac, char **av)
 			if ((ret = parse_option_line(av[i])) != 0)
 				return (ret);
 		}
+		g_global_data.av = av[i];
 		i++;
 	}
+	if (g_global_data.av == NULL)
+		return print_usage();
 	return (0);
 }

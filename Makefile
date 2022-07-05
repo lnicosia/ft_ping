@@ -37,7 +37,8 @@ LDFLAGS = -L $(LIBFT_DIR)
 LIB_RAW = 
 
 SRC_RAW =	main.c ft_ping.c parse_option_line.c resolve_hostname.c \
-			send_probes.c sighandlers.c checksum.c \
+			send_probes.c sighandlers.c checksum.c ft_gethostname.c \
+			free_and_exit.c \
 
 HEADERS =	options.h ft_ping.h ip.h send_probes.h
 
@@ -60,7 +61,7 @@ CFLAGS =	-Wall -Wextra -Werror -Wpadded -Wconversion -I $(INCLUDES_DIR) \
 	  	-I $(LIBFT_DIR)/includes -I $(BMP_PARSER_DIR)/includes \
 		-I $(LIBMFT_DIR)/includes -I $(GLAD_DIR)/include \
 		-g3 \
-		#-fsanitize=address \
+		-fsanitize=address \
 		#$(OPTI_FLAGS) \
 		
 	

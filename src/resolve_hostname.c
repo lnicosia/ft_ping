@@ -1,5 +1,6 @@
 #include "libft.h"
 #include "ip.h"
+#include "ft_ping.h"
 #include <netinet/in.h>
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
@@ -53,8 +54,6 @@ void		print_addrinfo(struct addrinfo *ai)
 
 t_ip		resolve_hostname(char *hostname)
 {
-	char	ipstr[INET6_ADDRSTRLEN];
-	char	iptype;
 	t_ip	res;
 
 	struct addrinfo *ai;
@@ -66,32 +65,32 @@ t_ip		resolve_hostname(char *hostname)
 	ft_bzero(&res, sizeof(res));
 	if (getaddrinfo(hostname, NULL, &hints, &ai))
 	{
-		perror("getaddrinfo");
-		return res;
+		dprintf(STDERR_FILENO, "ft_ping: %s: Name or service not known\n",
+			hostname);
+		free_and_exit_failure();
 	}
 	struct addrinfo *tmp = ai;
 	while (tmp)
 	{
-		//printf("\nAddrinfo:\n");
+		//printf("Addr info:\n");
 		//print_addrinfo(tmp);
-		iptype = '?';
 		void	*addr = NULL;
 		if (tmp->ai_family == AF_INET)
 		{
 			struct sockaddr_in *ip4 = (struct sockaddr_in*)tmp->ai_addr;
 			addr = &(ip4->sin_addr);
-			ft_memcpy(&res.ip4, ip4, sizeof(res));
-			iptype = '4';
+			ft_memcpy(&res.ip4, ip4, sizeof(*ip4));
+			inet_ntop(tmp->ai_family, addr, res.str4, INET_ADDRSTRLEN);
+			//printf("IP4 = %s\n", res.str4);
 		}
 		else if (tmp->ai_family == AF_INET6)
 		{
 			struct sockaddr_in6 *ip6 = (struct sockaddr_in6*)tmp->ai_addr;
 			addr = &(ip6->sin6_addr);
-			ft_memcpy(&res.ip6, ip6, sizeof(res));
-			iptype = '6';
+			ft_memcpy(&res.ip6, ip6, sizeof(*ip6));
+			inet_ntop(tmp->ai_family, addr, res.str6, INET6_ADDRSTRLEN);
+			//printf("IP6 = %s\n", res.str6);
 		}
-		inet_ntop(tmp->ai_family, addr, ipstr, INET6_ADDRSTRLEN);
-		printf("IPv%c = %s\n", iptype, ipstr);
 		tmp = tmp->ai_next;
 	}
 	freeaddrinfo(ai);
