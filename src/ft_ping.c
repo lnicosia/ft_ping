@@ -31,21 +31,23 @@ t_global_data	g_global_data;
 int	init_socket(void)
 {
 	int	sckt = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	if (sckt == -1)
+	{
+		perror("ft_ping: socket");
+		return -1;
+	}
 	if (setsockopt(sckt, SOL_IP, IP_TTL,
 		&g_global_data.ttl, sizeof(g_global_data.ttl)) != 0)
 	{
 		perror("ft_ping: setsockopt");
+		close(sckt);
 		return -1;
 	}
 	if (setsockopt(sckt, SOL_SOCKET, SO_RCVTIMEO,
 		&g_global_data.timeout, sizeof(g_global_data.timeout)) != 0)
 	{
 		perror("ft_ping: setsockopt");
-		return -1;
-	}
-	if (sckt == -1)
-	{
-		perror("ft_ping: socket");
+		close(sckt);
 		return -1;
 	}
 	return sckt;
