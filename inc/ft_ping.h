@@ -8,6 +8,8 @@
 # define EXTERN extern
 #endif
 
+#define PACKET_SIZE 64
+
 typedef struct				s_global_data
 {
 	volatile sig_atomic_t	interrupt_flag;

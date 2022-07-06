@@ -7,13 +7,51 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#define PACKET_SIZE 64
-
 struct	icmp_packet
 {
 	struct	icmphdr	header;
 	char			msg[PACKET_SIZE - sizeof(struct icmphdr)];
 };
+
+/**	Print ping statistics before stopping the program
+*/
+
+void	print_statistics(void)
+{
+	printf("\n--- %s ping statistics ---\n", g_global_data.av);
+	printf("%u packets transmitted, %u received, %u%% packet loss, "\
+		"time %dms\n",
+		g_global_data.packets_transmitted,
+		g_global_data.packets_received,
+		100 - (100 * (g_global_data.packets_received
+			/ g_global_data.packets_transmitted)),
+		0);
+	if (g_global_data.packets_received > 0)
+		printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
+			(float)g_global_data.min_time / 1000.0f,
+			(float)g_global_data.avg_time / 1000.0f,
+			(float)g_global_data.max_time / 1000.0f,
+			(float)g_global_data.mdev_time / 1000.0f);
+	else
+		printf("\n");
+}
+
+/** Set out packet data for every probe
+*/
+
+void	set_out_packet_data(struct icmp_packet* out_packet)
+{
+	ft_bzero(out_packet, sizeof(*out_packet));
+	out_packet->header.type = ICMP_ECHO;
+	out_packet->header.un.echo.id = 4242;
+	unsigned int i;
+	for (i = 0; i < sizeof(out_packet->msg) - 1; i++)
+		out_packet->msg[i] = (char)(i + '0');
+	out_packet->msg[i] = '\0';
+	//	Update sequence (= received packets count) and checksum
+	out_packet->header.un.echo.sequence = ++g_global_data.packets_transmitted;
+	out_packet->header.checksum = checksum(out_packet, sizeof(*out_packet));
+}
 
 /**	Send ICMP Echo out_packets to destination IP
 */
@@ -37,36 +75,19 @@ int	send_probes(int sckt)
 	//	Send out_packets while we can
 	while (1)
 	{
+		//	Interrupt signal -> print stats, close socket and exit
 		if (g_global_data.interrupt_flag == 1)
 		{
-			printf("\n--- %s ping statistics ---\n", g_global_data.av);
-			printf("%u out_packets transmitted, %u received, %u%% packet loss, "\
-				"time %dms\n",
-				g_global_data.packets_transmitted,
-				g_global_data.packets_received,
-				100 - (100 * (g_global_data.packets_received
-					/ g_global_data.packets_transmitted)),
-				0);
-			printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
-				(float)g_global_data.min_time / 1000.0f,
-				(float)g_global_data.avg_time / 1000.0f,
-				(float)g_global_data.max_time / 1000.0f,
-				(float)g_global_data.mdev_time / 1000.0f);
+			print_statistics();
 			close(sckt);
 			break ;
 		}
+		//	Alarm signal -> send a new echo and wait for an answer
 		if (g_global_data.alarm_flag == 1)
 		{
 			g_global_data.alarm_flag = 0;
-			ft_bzero(&out_packet, sizeof(out_packet));
-			out_packet.header.type = ICMP_ECHO;
-			out_packet.header.un.echo.id = 4242;
-			unsigned int i;
-			for (i = 0; i < sizeof(out_packet.msg) - 1; i++)
-				out_packet.msg[i] = (char)(i + '0');
-			out_packet.msg[i] = '\0';
-			out_packet.header.un.echo.sequence = ++g_global_data.packets_transmitted;
-			out_packet.header.checksum = checksum(&out_packet, sizeof(out_packet));
+			//	Set out packet data
+			set_out_packet_data(&out_packet);
 			gettimeofday(&send_time, NULL);
 			if (sendto(sckt, &out_packet, sizeof(out_packet), 0,
 				(struct sockaddr*)&g_global_data.dst_ip.ip4,
@@ -76,10 +97,8 @@ int	send_probes(int sckt)
 				close(sckt);
 				break ;
 			}
-			if ((received_bytes = recvmsg(sckt, &in_packet, 0)) == 1)
+			if ((received_bytes = recvmsg(sckt, &in_packet, MSG_DONTWAIT)) == -1)
 			{
-				dprintf(STDERR_FILENO, "No out_packet received\n");
-				perror("");
 			}
 			else
 			{
@@ -98,8 +117,7 @@ int	send_probes(int sckt)
 					g_global_data.max_time = diff;
 				if (diff < g_global_data.min_time)
 					g_global_data.min_time = diff;
-				g_global_data.avg_time =
-					(g_global_data.avg_time + diff) / 2;
+				g_global_data.avg_time += diff;
 			}
 			alarm(1);
 		}

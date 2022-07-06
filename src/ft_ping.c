@@ -59,8 +59,10 @@ int	ft_ping(int ac, char **av)
 	int ret = parse_ping_options(ac, av);
 	if (ret != 0)
 	{
+		//	Version print
 		if (ret == 3)
 			return 0;
+		//	Error
 		return ret;
 	}
 	if (getuid() != 0)
@@ -80,8 +82,8 @@ int	ft_ping(int ac, char **av)
 	}
 	g_global_data.src_ip = resolve_hostname(src_ip_name);
 	g_global_data.dst_ip = resolve_hostname(g_global_data.av);
-	printf("PING %s (%s) %d(%d) bytes of data.\n",
-	g_global_data.av, g_global_data.dst_ip.str4, 0, 0);
+	printf("PING %s (%s) %ld(%d) bytes of data.\n",
+	g_global_data.av, g_global_data.dst_ip.str4, PACKET_SIZE - sizeof(struct icmphdr), 84);
 	int	sckt = init_socket();
 	if (sckt == -1)
 		return 2;
