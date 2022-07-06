@@ -21,18 +21,20 @@ OBJ_DIR = obj
 BIN_DIR = .
 INCLUDES_DIR = inc
 LIBFT_DIR = $(LIB_DIR)/libft
+LIBMFT_DIR = $(LIB_DIR)/libmft
 INSTALL_DIR = install
 SED = sed
 ROOT = sudo
 
 #LIBS
 LIBFT = $(LIBFT_DIR)/libft.a
+LIBMFT = $(LIBMFT_DIR)/libmft.a
 
 ### Linking flags ###
 # Linking libgs
-LDLIBS = $(LIBFT)
+LDLIBS = $(LIBFT) $(LIBMFT)
 
-LDFLAGS = -L $(LIBFT_DIR)
+LDFLAGS = -L $(LIBFT_DIR) -L $(LIBMFT_DIR)
 
 LIB_RAW = 
 
@@ -58,8 +60,7 @@ NPROC = $(shell nproc)
 OPTI_FLAGS = -O3
 
 CFLAGS =	-Wall -Wextra -Werror -Wpadded -Wconversion -I $(INCLUDES_DIR) \
-	  	-I $(LIBFT_DIR)/includes -I $(BMP_PARSER_DIR)/includes \
-		-I $(LIBMFT_DIR)/includes -I $(GLAD_DIR)/include \
+	  	-I $(LIBFT_DIR)/includes -I $(LIBMFT_DIR)/includes \
 		-g3 \
 		-fsanitize=address \
 		#$(OPTI_FLAGS) \
@@ -101,12 +102,17 @@ RESET :="\e[0m"
 all:
 	@printf $(CYAN)"[INFO] Building libft..\n"$(RESET)
 	@make --no-print-directory -j$(NPROC) -C $(LIBFT_DIR)
+	@printf $(CYAN)"[INFO] Building libmft..\n"$(RESET)
+	@make --no-print-directory -j$(NPROC) -C $(LIBMFT_DIR)
 	@printf $(CYAN)"[INFO] Building $(NAME)..\n"$(RESET)
 	@make --no-print-directory -j$(NPROC) $(BIN_DIR)/$(NAME)
 
 
 $(LIBFT):
 	@make --no-print-directory -j$(NPROC) -C $(LIBFT_DIR)
+
+$(LIBMFT):
+	@make --no-print-directory -j$(NPROC) -C $(LIBMFT_DIR)
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
@@ -117,7 +123,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INCLUDES)
 	$(eval I=$(shell echo $$(($(I) + 1))))
 	gcc -c $< -o $@ $(CFLAGS) 
 
-$(NAME): $(LIBFT) $(OBJ_DIR) $(OBJ) 
+$(NAME): $(LIBFT) $(LIBMFT) $(OBJ_DIR) $(OBJ) 
 	@printf $(CYAN)"[INFO] Linking ${BIN_DIR}/${NAME}\n"$(RESET)
 	gcc $(CFLAGS) -o $(NAME) $(OBJ) $(LDFLAGS) $(LDLIBS)
 	@printf ${GREEN}"[INFO] Compiled $(BIN_DIR)/$(NAME) with success!\n"
@@ -125,11 +131,13 @@ $(NAME): $(LIBFT) $(OBJ_DIR) $(OBJ)
 
 clean:
 	@make --no-print-directory clean -C $(LIBFT_DIR)
+	@make --no-print-directory clean -C $(LIBMFT_DIR)
 	@printf ${CYAN}"[INFO] Removing objs\n"${RESET}
 	rm -rf $(OBJ_DIR)
 
 fclean:
 	@make --no-print-directory fclean -C $(LIBFT_DIR)
+	@make --no-print-directory fclean -C $(LIBMFT_DIR)
 	@printf ${CYAN}"[INFO] Removing objs\n"${RESET}
 	rm -rf $(OBJ_DIR)
 	@printf ${CYAN}"[INFO] Removing $(BIN_DIR)/$(NAME)\n"$(RESET)
