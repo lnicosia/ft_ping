@@ -65,12 +65,8 @@ int	ft_ping(int ac, char **av)
 	}
 	if (getuid() != 0)
 		return dprintf(STDERR_FILENO, "Must be root to run the program\n");
-	if (signal(SIGINT, &interrupt_sighandler) == SIG_ERR)
-	{
-		perror("signal");
-		return -1;
-	}
-	if (signal(SIGALRM, &alarm_sighandler) == SIG_ERR)
+	if (signal(SIGINT, &interrupt_sighandler) == SIG_ERR
+		|| signal(SIGALRM, &alarm_sighandler) == SIG_ERR)
 	{
 		perror("signal");
 		return -1;

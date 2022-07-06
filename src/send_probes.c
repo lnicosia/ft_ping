@@ -24,8 +24,15 @@ int	send_probes(int sckt)
 	struct msghdr	in_packet;	
 	struct timeval	send_time;
 	struct timeval	recv_time;
+	ssize_t			received_bytes;
+	char			iov_buff[PACKET_SIZE];
+	struct iovec	iov;
 
-	//	Send the first out_packet
+	ft_bzero(&in_packet, sizeof(in_packet));
+	iov.iov_base = iov_buff;
+	iov.iov_len = sizeof(iov_buff);
+	in_packet.msg_iov = &iov;
+	in_packet.msg_iovlen = 1;
 
 	//	Send out_packets while we can
 	while (1)
@@ -52,7 +59,6 @@ int	send_probes(int sckt)
 		{
 			g_global_data.alarm_flag = 0;
 			ft_bzero(&out_packet, sizeof(out_packet));
-			ft_bzero(&in_packet, sizeof(in_packet));
 			out_packet.header.type = ICMP_ECHO;
 			out_packet.header.un.echo.id = 4242;
 			unsigned int i;
@@ -70,21 +76,18 @@ int	send_probes(int sckt)
 				close(sckt);
 				break ;
 			}
-			if (recvmsg(sckt, &in_packet, 0) == 1)
+			if ((received_bytes = recvmsg(sckt, &in_packet, 0)) == 1)
 			{
 				dprintf(STDERR_FILENO, "No out_packet received\n");
 				perror("");
 			}
 			else
 			{
-				//printf("Msg name = '%s'\n", (char*)in_packet.msg_name);
-				//printf("Msg name len = %d\n", in_packet.msg_namelen);
-				//printf("Msg control len = %ld\n", in_packet.msg_controllen);
 				g_global_data.packets_received++;
 				gettimeofday(&recv_time, NULL);
 				suseconds_t	diff = recv_time.tv_usec - send_time.tv_usec;
-				printf("%d bytes from %s: icmp_seq=%d",
-					PACKET_SIZE, g_global_data.dst_ip.str4,
+				printf("%ld bytes from %s: icmp_seq=%d",
+					received_bytes, g_global_data.dst_ip.str4,
 					g_global_data.packets_received);
 				if ((double)diff / 1000.0 > (double)g_global_data.ttl)
 					printf(" Time to live exceeded\n");
