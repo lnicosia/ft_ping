@@ -41,7 +41,10 @@ int	send_probes(int sckt)
 					/ g_global_data.packets_transmitted)),
 				0);
 			printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
-				0.0f, 0.0f, 0.0f, 0.0f);
+				(float)g_global_data.min_time / 1000.0f,
+				(float)g_global_data.avg_time / 1000.0f,
+				(float)g_global_data.max_time / 1000.0f,
+				(float)g_global_data.mdev_time / 1000.0f);
 			break ;
 		}
 		if (g_global_data.alarm_flag == 1)
@@ -77,10 +80,17 @@ int	send_probes(int sckt)
 				//printf("Msg control len = %ld\n", in_packet.msg_controllen);
 				g_global_data.packets_received++;
 				gettimeofday(&recv_time, NULL);
+				suseconds_t	diff = recv_time.tv_usec - send_time.tv_usec;
 				printf("%d bytes from %s: icmp_seq=%d ttl=%ld time=%.2f ms\n",
 					PACKET_SIZE, g_global_data.dst_ip.str4,
 					g_global_data.packets_received, g_global_data.ttl - 1,
-					(float)(recv_time.tv_usec - send_time.tv_usec) / 1000.0f);
+					(float)(diff) / 1000.0f);
+				if (diff > g_global_data.max_time)
+					g_global_data.max_time = diff;
+				if (diff < g_global_data.min_time)
+					g_global_data.min_time = diff;
+				g_global_data.avg_time =
+					(g_global_data.avg_time + diff) / 2;
 			}
 			alarm(1);
 		}

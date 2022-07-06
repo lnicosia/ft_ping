@@ -22,6 +22,7 @@ t_global_data	init_global_data(void)
 	res.opt |= OPT_IP4;
 	res.ttl = 64;
 	res.alarm_flag = 1;
+	res.min_time = 1000000;
 	return res;
 }
 

@@ -19,6 +19,10 @@ typedef struct				s_global_data
 	size_t					ttl;
 	size_t					packet_size;
 	struct timeval			timeout;
+	suseconds_t				min_time;
+	suseconds_t				max_time;
+	suseconds_t				avg_time;
+	suseconds_t				mdev_time;
 	uint16_t				packets_transmitted;
 	uint16_t				packets_received;
 	char					padding[4];
