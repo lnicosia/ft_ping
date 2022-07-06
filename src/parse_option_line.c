@@ -36,7 +36,7 @@ int		print_usage(void)
 int		check_opt(char *c, char **av, int i)
 {
 	if (*c == 'h')
-		return print_usage_stdin();
+		return print_usage();
 	else if (*c == 'V')
 		return print_version();
 	else if (*c == 'v')
