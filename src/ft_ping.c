@@ -20,12 +20,35 @@ t_global_data	init_global_data(void)
 
 	ft_bzero(&res, sizeof(res));
 	res.opt |= OPT_IP4;
-	res.packets_transmitted = 1;
 	res.ttl = 64;
+	res.alarm_flag = 1;
 	return res;
 }
 
 t_global_data	g_global_data;
+
+int	init_socket(void)
+{
+	int	sckt = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	if (setsockopt(sckt, SOL_IP, IP_TTL,
+		&g_global_data.ttl, sizeof(g_global_data.ttl)) != 0)
+	{
+		perror("ft_ping: setsockopt");
+		return -1;
+	}
+	if (setsockopt(sckt, SOL_SOCKET, SO_RCVTIMEO,
+		&g_global_data.timeout, sizeof(g_global_data.timeout)) != 0)
+	{
+		perror("ft_ping: setsockopt");
+		return -1;
+	}
+	if (sckt == -1)
+	{
+		perror("ft_ping: socket");
+		return -1;
+	}
+	return sckt;
+}
 
 int	ft_ping(int ac, char **av)
 {
@@ -60,9 +83,9 @@ int	ft_ping(int ac, char **av)
 	g_global_data.dst_ip = resolve_hostname(g_global_data.av);
 	printf("PING %s (%s) %d(%d) bytes of data.\n",
 	g_global_data.av, g_global_data.dst_ip.str4, 0, 0);
-	int	sckt = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	int	sckt = init_socket();
 	if (sckt == -1)
-		return ft_perror("socket");
+		return 2;
 	send_probes(sckt);
 	return 0;
 }
