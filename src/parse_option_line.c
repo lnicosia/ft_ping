@@ -43,6 +43,8 @@ int		check_opt(char *c, char **av, int i)
 		g_global_data.opt |= OPT_VERBOSE;
 	else if (*c == '4')
 		g_global_data.opt |= OPT_IP4;
+	else if (*c == 'D')
+		g_global_data.opt |= OPT_PRINT_TIMESTAMP;
 	else if (*c == 't')
 	{
 		if (av[i + 1])
