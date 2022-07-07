@@ -25,6 +25,7 @@ typedef struct				s_global_data
 	suseconds_t				max_time;
 	suseconds_t				avg_time;
 	suseconds_t				mdev_time;
+	suseconds_t				square_sum;
 	uint16_t				packets_transmitted;
 	uint16_t				packets_received;
 	char					padding[4];

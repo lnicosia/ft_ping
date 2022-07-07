@@ -1,4 +1,5 @@
 #include "libft.h"
+#include "libmft.h"
 #include "ip.h"
 #include "options.h"
 #include "ft_ping.h"
@@ -26,12 +27,14 @@ void	print_statistics(void)
 		100 - (100 * (g_global_data.packets_received
 			/ g_global_data.packets_transmitted)),
 		0);
+	double avg = (double)g_global_data.avg_time / (double)g_global_data.packets_received;
+	double mdev = ft_sqrt((double)g_global_data.square_sum
+		/ (double)g_global_data.packets_received - avg * avg);
 	if (g_global_data.packets_received > 0)
 		printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
-			(float)g_global_data.min_time / 1000.0f,
-			(float)g_global_data.avg_time / 1000.0f,
-			(float)g_global_data.max_time / 1000.0f,
-			(float)g_global_data.mdev_time / 1000.0f);
+			(double)g_global_data.min_time / 1000.0,
+			avg / 1000.0,
+			(double)g_global_data.max_time / 1000.0, mdev / 1000.0);
 	else
 		printf("\n");
 }
@@ -112,12 +115,13 @@ int	send_probes(int sckt)
 					printf(" Time to live exceeded\n");
 				else
 					printf(" ttl=%ld time=%.2f ms\n",
-						g_global_data.ttl - 1, (float)(diff) / 1000.0f);
+						g_global_data.ttl - 1, (double)(diff) / 1000.0);
 				if (diff > g_global_data.max_time)
 					g_global_data.max_time = diff;
 				if (diff < g_global_data.min_time)
 					g_global_data.min_time = diff;
 				g_global_data.avg_time += diff;
+				g_global_data.square_sum += diff * diff;
 			}
 			alarm(1);
 		}
