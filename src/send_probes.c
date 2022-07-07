@@ -18,6 +18,8 @@ void	print_statistics(void)
 		g_global_data.packets_received);
 	double	packet_ratio = (double)g_global_data.packets_received
 		/ (double)g_global_data.packets_transmitted;
+	if (g_global_data.errors > 0)
+		printf(" +%ld errors,", g_global_data.errors);
 	printf(" %.f%% packet loss, time %dms\n",
 		100 - (100 * packet_ratio), 0);
 	double avg = (double)g_global_data.time_sum
@@ -67,6 +69,7 @@ void	print_received_packet_info(ssize_t received_bytes,
 	{
 		printf(" Time to live exceeded\n");
 		g_global_data.packets_received--;
+		g_global_data.errors++;
 	}
 	else
 	{

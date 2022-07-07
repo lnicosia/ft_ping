@@ -22,6 +22,7 @@ typedef struct				s_global_data
 	t_ip					dst_ip;
 	size_t					ttl;
 	size_t					packet_size;
+	size_t					errors;
 	struct timeval			timeout;
 	suseconds_t				min_time;
 	suseconds_t				max_time;
