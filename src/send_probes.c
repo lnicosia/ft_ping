@@ -80,7 +80,7 @@ void	print_received_packet_info(ssize_t received_bytes,
 }
 
 void	send_and_receive_probe(int sckt,
- struct icmp_packet *out_packet, struct msghdr *in_packet)
+ struct icmp_packet *out_packet, struct msghdr *msghdr)
 {
 	suseconds_t		send_time;
 	suseconds_t		recv_time;
@@ -104,7 +104,7 @@ void	send_and_receive_probe(int sckt,
 		printf("Sending\n");
 		print_icmp_packet(out_packet);
 	}
-	received_bytes = recvmsg(sckt, in_packet, 0);
+	received_bytes = recvmsg(sckt, msghdr, 0);
 	if (received_bytes == -1)
 	{
 		if (g_global_data.opt & OPT_VERBOSE)
@@ -117,6 +117,11 @@ void	send_and_receive_probe(int sckt,
 	}
 	else //	We received a message!
 	{
+		if (g_global_data.opt & OPT_VERBOSE)
+		{
+			printf("Receiving\n");
+			print_icmp_packet(msghdr->msg_iov->iov_base);
+		}
 		g_global_data.packets_received++;
 		//	Compare current time to when we sent the packet 
 		if (gettimeofday(&recv_timeval, NULL) == -1)
@@ -140,15 +145,16 @@ void	send_and_receive_probe(int sckt,
 int	send_probes(int sckt)
 {
 	struct icmp_packet	out_packet;
-	struct msghdr		in_packet;	
-	char				iov_buff[ICMP_PACKET_SIZE];
+	struct icmp_packet	in_packet;	
+	struct msghdr		msghdr;	
 	struct iovec		iov;
 
 	ft_bzero(&in_packet, sizeof(in_packet));
-	iov.iov_base = iov_buff;
-	iov.iov_len = sizeof(iov_buff);
-	in_packet.msg_iov = &iov;
-	in_packet.msg_iovlen = 1;
+	ft_bzero(&msghdr, sizeof(msghdr));
+	iov.iov_base = &in_packet;
+	iov.iov_len = ICMP_PACKET_SIZE;
+	msghdr.msg_iov = &iov;
+	msghdr.msg_iovlen = 1;
 
 	//	Send out_packets while we can
 	while (1)
@@ -164,7 +170,7 @@ int	send_probes(int sckt)
 		if (g_global_data.alarm_flag == 1)
 		{
 			g_global_data.alarm_flag = 0;
-			send_and_receive_probe(sckt, &out_packet, &in_packet);
+			send_and_receive_probe(sckt, &out_packet, &msghdr);
 			alarm(1);
 		}
 	}
