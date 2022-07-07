@@ -10,7 +10,7 @@
 struct	icmp_packet
 {
 	struct	icmphdr	header;
-	char			msg[PACKET_SIZE - sizeof(struct icmphdr)];
+	char			msg[PAYLOAD_SIZE];
 };
 
 int		send_probes(int sckt);

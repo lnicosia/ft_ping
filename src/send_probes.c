@@ -130,7 +130,7 @@ int	send_probes(int sckt)
 {
 	struct icmp_packet	out_packet;
 	struct msghdr	in_packet;	
-	char			iov_buff[PACKET_SIZE];
+	char			iov_buff[ICMP_PACKET_SIZE];
 	struct iovec	iov;
 
 	ft_bzero(&in_packet, sizeof(in_packet));
