@@ -52,8 +52,13 @@ void	set_out_packet_data(struct icmp_packet* out_packet)
 /**	Print received packet info: size, ip, etc
 */
 
-void	print_received_packet_info(ssize_t received_bytes, suseconds_t diff)
+void	print_received_packet_info(ssize_t received_bytes,
+	struct timeval current_time, suseconds_t diff)
 {
+	if (g_global_data.opt & OPT_PRINT_TIMESTAMP)
+	{
+		printf("[%ld.%ld] ", current_time.tv_sec, current_time.tv_usec);
+	}
 	printf("%ld bytes from %s: icmp_seq=%d",
 		received_bytes, g_global_data.dst_ip.str4,
 		g_global_data.packets_received);
@@ -97,7 +102,7 @@ void	send_and_receive_probe(int sckt,
 		//	Compare current time to when we sent the packet 
 		gettimeofday(&recv_time, NULL);
 		suseconds_t	diff = recv_time.tv_usec - send_time.tv_usec;
-		print_received_packet_info(received_bytes, diff);
+		print_received_packet_info(received_bytes, recv_time, diff);
 		//	Update min, max and average timers
 		if (diff > g_global_data.max_time)
 			g_global_data.max_time = diff;
