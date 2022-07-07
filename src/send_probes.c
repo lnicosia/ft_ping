@@ -13,14 +13,15 @@
 void	print_statistics(void)
 {
 	printf("\n--- %s ping statistics ---\n", g_global_data.av);
-	printf("%u packets transmitted, %u received, %u%% packet loss, "\
-		"time %dms\n",
+	printf("%u packets transmitted, %u received,",
 		g_global_data.packets_transmitted,
-		g_global_data.packets_received,
-		100 - (100 * (g_global_data.packets_received
-			/ g_global_data.packets_transmitted)),
-		0);
-	double avg = (double)g_global_data.time_sum / (double)g_global_data.packets_received;
+		g_global_data.packets_received);
+	double	packet_ratio = (double)g_global_data.packets_received
+		/ (double)g_global_data.packets_transmitted;
+	printf(" %.f%% packet loss, time %dms\n",
+		100 - (100 * packet_ratio), 0);
+	double avg = (double)g_global_data.time_sum
+		/ (double)g_global_data.packets_received;
 	double mdev = ft_sqrt((double)g_global_data.square_sum
 		/ (double)g_global_data.packets_received - avg * avg);
 	if (g_global_data.packets_received > 0)
@@ -61,10 +62,11 @@ void	print_received_packet_info(ssize_t received_bytes,
 	}
 	printf("%ld bytes from %s: icmp_seq=%d",
 		received_bytes, g_global_data.dst_ip.str4,
-		g_global_data.packets_received);
+		g_global_data.packets_transmitted);
 	if ((double)time_diff / 1000.0 > (double)g_global_data.ttl)
 	{
 		printf(" Time to live exceeded\n");
+		g_global_data.packets_received--;
 	}
 	else
 	{
