@@ -13,30 +13,20 @@ int		print_version(void)
 
 int		print_usage_stdin(void)
 {
-	printf("Usage: ft_ping [option(s)] [file(s)]\n");
-	printf(" List symbols in [file(s)] (a.out by default).\n");
-	printf(" The options are:\n");
-	printf("  -h, --help\t\tprint help and exit\n");
-	printf("  -v\t\t\terbose output\n");
-	printf("  -V, --version\t\tprint version and exit\n");
+	printf("Usage: ft_ping [-DhvV] [-t ttl] destination\n");
 	return 2;
 }
 
-int		print_usage(void)
+int		print_usage_stderr(void)
 {
-	dprintf(STDERR_FILENO, "Usage: ft_ping [option(s)] [file(s)]\n");
-	dprintf(STDERR_FILENO, " List symbols in [file(s)] (a.out by default).\n");
-	dprintf(STDERR_FILENO, " The options are:\n");
-	dprintf(STDERR_FILENO, "  -h, --help\t\tprint help and exit\n");
-	dprintf(STDERR_FILENO, "  -v\t\t\terbose output\n");
-	dprintf(STDERR_FILENO, "  -V, --version\t\tprint version and exit\n");
+	dprintf(STDERR_FILENO, "Usage: ft_ping [-DhvV] [-t ttl] destination\n");
 	return 2;
 }
 
 int		check_opt(char *c, char **av, int i)
 {
 	if (*c == 'h')
-		return print_usage();
+		return print_usage_stderr();
 	else if (*c == 'V')
 		return print_version();
 	else if (*c == 'v')
@@ -73,7 +63,7 @@ int		check_opt(char *c, char **av, int i)
 	else if (*c != 'e')
 	{
 		dprintf(STDERR_FILENO, "ft_ping: invalid option -- '%s'\n", c);
-		return print_usage();
+		return print_usage_stderr();
 	}
 	return (0);
 }
@@ -93,7 +83,7 @@ int		parse_option_line(char *av, char **full_av, int i)
 		else
 		{
 			dprintf(STDERR_FILENO, "ft_ping: invalid option '%s'\n", av);
-			return print_usage();
+			return print_usage_stderr();
 		}
 	}
 	else
@@ -140,6 +130,6 @@ int		parse_ping_options(int ac, char **av)
 		i++;
 	}
 	if (g_global_data.av == NULL)
-		return print_usage();
+		return print_usage_stderr();
 	return (0);
 }

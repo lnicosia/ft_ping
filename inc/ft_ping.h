@@ -36,7 +36,7 @@ EXTERN t_global_data		g_global_data;
 int							ft_ping(int ac, char **av);
 unsigned short				checksum(void *ptr, size_t len);
 int							ft_gethostname(char *name, size_t size);
-int							print_usage(void);
+int							print_usage_stderr(void);
 void						free_and_exit_success(void);
 void						free_and_exit_failure(void);
 

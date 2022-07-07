@@ -66,7 +66,10 @@ int	ft_ping(int ac, char **av)
 		return ret;
 	}
 	if (getuid() != 0)
-		return dprintf(STDERR_FILENO, "Must be root to run the program\n");
+	{
+		dprintf(STDERR_FILENO, "Must be root to run the program\n");
+		return 2;
+	}
 	if (signal(SIGINT, &interrupt_sighandler) == SIG_ERR
 		|| signal(SIGALRM, &alarm_sighandler) == SIG_ERR)
 	{
