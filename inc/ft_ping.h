@@ -8,9 +8,11 @@
 # define EXTERN extern
 #endif
 
-#define PAYLOAD_SIZE (size_t)56
-#define ICMP_PACKET_SIZE PAYLOAD_SIZE + sizeof(struct icmphdr)
-#define IP_PACKET_SIZE ICMP_PACKET_SIZE + sizeof(struct iphdr)
+#define PAYLOAD_SIZE		(size_t)56
+#define ICMP_HEADER_SIZE	sizeof(struct icmphdr)
+#define IC_HEADER_SIZE		sizeof(struct ichdr)
+#define ICMP_PACKET_SIZE	PAYLOAD_SIZE + ICMP_HEADER_SIZE
+#define IP_PACKET_SIZE		ICMP_PACKET_SIZE + ICMP_PACKET_SIZE
 
 typedef struct				s_global_data
 {

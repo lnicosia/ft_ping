@@ -7,12 +7,13 @@
 /**	ICMP packet struct: a header + a message
 */
 
-struct	icmp_packet
+struct				icmp_packet
 {
 	struct	icmphdr	header;
-	char			msg[PAYLOAD_SIZE];
+	char			payload[PAYLOAD_SIZE];
 };
 
-int		send_probes(int sckt);
+int					send_probes(int sckt);
+void				print_icmp_packet(struct icmp_packet *packet);
 
 #endif

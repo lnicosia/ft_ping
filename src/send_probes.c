@@ -42,11 +42,12 @@ void	set_out_packet_data(struct icmp_packet* out_packet)
 {
 	ft_bzero(out_packet, sizeof(*out_packet));
 	out_packet->header.type = ICMP_ECHO;
+	out_packet->header.code = 0;
 	out_packet->header.un.echo.id = 4242;
 	unsigned int i;
-	for (i = 0; i < sizeof(out_packet->msg) - 1; i++)
-		out_packet->msg[i] = (char)(i + '0');
-	out_packet->msg[i] = '\0';
+	for (i = 0; i < sizeof(out_packet->payload) - 1; i++)
+		out_packet->payload[i] = (char)(i + '0');
+	out_packet->payload[i] = '\0';
 	//	Update sequence (= received packets count) and checksum
 	out_packet->header.un.echo.sequence = ++g_global_data.packets_transmitted;
 	out_packet->header.checksum = checksum(out_packet, sizeof(*out_packet));
@@ -98,12 +99,17 @@ void	send_and_receive_probe(int sckt,
 		close(sckt);
 		free_and_exit_failure();
 	}
+	if (g_global_data.opt & OPT_VERBOSE)
+	{
+		printf("Sending\n");
+		print_icmp_packet(out_packet);
+	}
 	received_bytes = recvmsg(sckt, in_packet, 0);
 	if (received_bytes == -1)
 	{
 		if (g_global_data.opt & OPT_VERBOSE)
 		{
-			perror("recvmsg");
+			perror("recvpayload");
 		}
 		else if (g_global_data.opt & OPT_V)
 		{
@@ -134,9 +140,9 @@ void	send_and_receive_probe(int sckt,
 int	send_probes(int sckt)
 {
 	struct icmp_packet	out_packet;
-	struct msghdr	in_packet;	
-	char			iov_buff[ICMP_PACKET_SIZE];
-	struct iovec	iov;
+	struct msghdr		in_packet;	
+	char				iov_buff[ICMP_PACKET_SIZE];
+	struct iovec		iov;
 
 	ft_bzero(&in_packet, sizeof(in_packet));
 	iov.iov_base = iov_buff;
