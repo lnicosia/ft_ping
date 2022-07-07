@@ -23,8 +23,7 @@ typedef struct				s_global_data
 	struct timeval			timeout;
 	suseconds_t				min_time;
 	suseconds_t				max_time;
-	suseconds_t				avg_time;
-	suseconds_t				mdev_time;
+	suseconds_t				time_sum;
 	suseconds_t				square_sum;
 	uint16_t				packets_transmitted;
 	uint16_t				packets_received;

@@ -30,7 +30,7 @@ int		check_opt(char *c, char **av, int i)
 	else if (*c == 'V')
 		return print_version();
 	else if (*c == 'v')
-		g_global_data.opt |= OPT_VERBOSE;
+		g_global_data.opt |= OPT_V;
 	else if (*c == '4')
 		g_global_data.opt |= OPT_IP4;
 	else if (*c == 'D')

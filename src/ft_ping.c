@@ -23,6 +23,8 @@ t_global_data	init_global_data(void)
 	res.ttl = 64;
 	res.alarm_flag = 1;
 	res.min_time = 1000000;
+	res.timeout.tv_sec = 1;
+	res.timeout.tv_usec = 1;
 	return res;
 }
 

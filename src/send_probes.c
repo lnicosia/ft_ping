@@ -3,9 +3,9 @@
 #include "ip.h"
 #include "options.h"
 #include "send_probes.h"
+#include "time_utils.h"
 #include <netinet/ip.h>
 #include <stdio.h>
-#include <sys/time.h>
 
 /**	Print ping statistics before stopping the program
 */
@@ -20,7 +20,7 @@ void	print_statistics(void)
 		100 - (100 * (g_global_data.packets_received
 			/ g_global_data.packets_transmitted)),
 		0);
-	double avg = (double)g_global_data.avg_time / (double)g_global_data.packets_received;
+	double avg = (double)g_global_data.time_sum / (double)g_global_data.packets_received;
 	double mdev = ft_sqrt((double)g_global_data.square_sum
 		/ (double)g_global_data.packets_received - avg * avg);
 	if (g_global_data.packets_received > 0)
@@ -53,7 +53,7 @@ void	set_out_packet_data(struct icmp_packet* out_packet)
 */
 
 void	print_received_packet_info(ssize_t received_bytes,
-	struct timeval current_time, suseconds_t diff)
+	struct timeval current_time, suseconds_t time_diff)
 {
 	if (g_global_data.opt & OPT_PRINT_TIMESTAMP)
 	{
@@ -62,27 +62,29 @@ void	print_received_packet_info(ssize_t received_bytes,
 	printf("%ld bytes from %s: icmp_seq=%d",
 		received_bytes, g_global_data.dst_ip.str4,
 		g_global_data.packets_received);
-	if ((double)diff / 1000.0 > (double)g_global_data.ttl)
+	if ((double)time_diff / 1000.0 > (double)g_global_data.ttl)
 	{
 		printf(" Time to live exceeded\n");
 	}
 	else
 	{
 		printf(" ttl=%ld time=%.2f ms\n",
-			g_global_data.ttl - 1, (double)(diff) / 1000.0);
+			g_global_data.ttl - 1, (double)(time_diff) / 1000.0);
 	}
 }
 
 void	send_and_receive_probe(int sckt,
  struct icmp_packet *out_packet, struct msghdr *in_packet)
 {
-	struct timeval	send_time;
-	struct timeval	recv_time;
+	suseconds_t		send_time;
+	suseconds_t		recv_time;
+	suseconds_t		time_diff;
+	struct timeval	recv_timeval;
 	ssize_t			received_bytes;
 
 	//	Set out packet data
 	set_out_packet_data(out_packet);
-	gettimeofday(&send_time, NULL);
+	send_time = get_time();
 	if (sendto(sckt, out_packet, sizeof(*out_packet), 0,
 		(struct sockaddr*)&g_global_data.dst_ip.ip4,
 		sizeof(g_global_data.dst_ip.ip4)) <= 0)
@@ -91,25 +93,33 @@ void	send_and_receive_probe(int sckt,
 		close(sckt);
 		free_and_exit_failure();
 	}
-	if ((received_bytes = recvmsg(sckt, in_packet, 0)) == -1)
+	received_bytes = recvmsg(sckt, in_packet, 0);
+	if (received_bytes == -1)
 	{
-		//printf("Not received\n");
-		//perror("recvmsg");
+		if (g_global_data.opt & OPT_VERBOSE)
+		{
+			perror("recvmsg");
+		}
+		else if (g_global_data.opt & OPT_V)
+		{
+		}
 	}
 	else //	We received a message!
 	{
 		g_global_data.packets_received++;
 		//	Compare current time to when we sent the packet 
-		gettimeofday(&recv_time, NULL);
-		suseconds_t	diff = recv_time.tv_usec - send_time.tv_usec;
-		print_received_packet_info(received_bytes, recv_time, diff);
+		if (gettimeofday(&recv_timeval, NULL) == -1)
+			dprintf(STDERR_FILENO, "ft_ping: gettimeofday error\n");
+		recv_time = recv_timeval.tv_sec * 1000000 + recv_timeval.tv_usec;
+		time_diff = recv_time - send_time;
+		print_received_packet_info(received_bytes, recv_timeval, time_diff);
 		//	Update min, max and average timers
-		if (diff > g_global_data.max_time)
-			g_global_data.max_time = diff;
-		if (diff < g_global_data.min_time)
-			g_global_data.min_time = diff;
-		g_global_data.avg_time += diff;
-		g_global_data.square_sum += diff * diff;
+		if (time_diff > g_global_data.max_time)
+			g_global_data.max_time = time_diff;
+		if (time_diff < g_global_data.min_time)
+			g_global_data.min_time = time_diff;
+		g_global_data.time_sum += time_diff;
+		g_global_data.square_sum += time_diff * time_diff;
 	}
 }
 
