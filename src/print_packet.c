@@ -17,8 +17,7 @@ void	print_icmp_packet(struct icmp_packet *packet)
 	//	Sequence
 	printf("       Sequence %-5hu    \e[36m|\n", packet->header.un.echo.sequence);
 	printf("\e[36m+---------------------+-------------------------+\n");
-	printf("\e[36m|               \e[33mPayload (%lu bytes)               \e[36m|\n",
-		sizeof(PAYLOAD_SIZE));
+	printf("\e[36m|                  \e[33mPayload                      \e[36m|\n");
 	printf("\e[36m+-----------------------------------------------+\n");
 	printf("\e[0m");
 }

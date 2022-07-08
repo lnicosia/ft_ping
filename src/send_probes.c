@@ -120,7 +120,7 @@ void	send_and_receive_probe(int sckt,
 		if (g_global_data.opt & OPT_VERBOSE)
 		{
 			printf("Receiving\n");
-			print_icmp_packet(msghdr->msg_iov->iov_base);
+			print_icmp_packet(msghdr->msg_iov->iov_base + IP_HEADER_SIZE);
 		}
 		g_global_data.packets_received++;
 		//	Compare current time to when we sent the packet 
