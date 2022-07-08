@@ -57,15 +57,21 @@ void	set_out_packet_data(struct icmp_packet* out_packet)
 */
 
 void	print_received_packet_info(ssize_t received_bytes,
-	struct timeval current_time, suseconds_t time_diff)
+	struct timeval current_time, suseconds_t time_diff, struct msghdr *msghdr)
 {
+	struct ip *ip = (struct ip*)msghdr->msg_iov->iov_base;
+	struct icmphdr *icmphdr = (struct icmphdr*)(msghdr->msg_iov->iov_base
+		+ IP_HEADER_SIZE);
+	char	buff[INET6_ADDRSTRLEN];
+	void	*addr = &(ip->ip_src);
+	inet_ntop(AF_INET, addr, buff, INET6_ADDRSTRLEN);
 	if (g_global_data.opt & OPT_PRINT_TIMESTAMP)
 	{
 		printf("[%ld.%ld] ", current_time.tv_sec, current_time.tv_usec);
 	}
 	printf("%ld bytes from %s: icmp_seq=%d",
 		received_bytes, g_global_data.dst_ip.str4,
-		g_global_data.packets_transmitted);
+		icmphdr->un.echo.sequence);
 	if ((double)time_diff / 1000.0 > (double)g_global_data.ttl)
 	{
 		printf(" Time to live exceeded\n");
@@ -74,8 +80,8 @@ void	print_received_packet_info(ssize_t received_bytes,
 	}
 	else
 	{
-		printf(" ttl=%ld time=%.2f ms\n",
-			g_global_data.ttl - 1, (double)(time_diff) / 1000.0);
+		printf(" ttl=%hhu time=%.2f ms\n",
+			ip->ip_ttl, (double)(time_diff) / 1000.0);
 	}
 }
 
@@ -109,7 +115,7 @@ void	send_and_receive_probe(int sckt,
 	{
 		if (g_global_data.opt & OPT_VERBOSE)
 		{
-			perror("recvpayload");
+			perror("recvmsg");
 		}
 		else if (g_global_data.opt & OPT_V)
 		{
@@ -129,7 +135,8 @@ void	send_and_receive_probe(int sckt,
 			dprintf(STDERR_FILENO, "ft_ping: gettimeofday error\n");
 		recv_time = recv_timeval.tv_sec * 1000000 + recv_timeval.tv_usec;
 		time_diff = recv_time - send_time;
-		print_received_packet_info(received_bytes, recv_timeval, time_diff);
+		print_received_packet_info(received_bytes, recv_timeval, time_diff,
+			msghdr);
 		//	Update min, max and average timers
 		if (time_diff > g_global_data.max_time)
 			g_global_data.max_time = time_diff;
