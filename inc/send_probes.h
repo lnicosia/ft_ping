@@ -14,6 +14,7 @@ struct				icmp_packet
 };
 
 int					send_probes(int sckt);
-void				print_icmp_packet(struct icmp_packet *packet);
+void				print_icmp_header(struct icmphdr *header);
+void				print_ip4_header(struct ip *header);
 
 #endif
