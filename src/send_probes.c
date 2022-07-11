@@ -69,18 +69,17 @@ void	print_received_packet_info(ssize_t received_bytes,
 	{
 		printf("[%ld.%ld] ", current_time.tv_sec, current_time.tv_usec);
 	}
-	printf("%ld bytes from %s: icmp_seq=%d",
-		received_bytes, g_global_data.dst_ip.str4,
-		icmphdr->un.echo.sequence);
-	if ((double)time_diff / 1000.0 > (double)g_global_data.ttl)
+	if (icmphdr->type != ICMP_ECHOREPLY)
 	{
-		printf(" Time to live exceeded\n");
+		print_response_error(ip, icmphdr);
 		g_global_data.packets_received--;
 		g_global_data.errors++;
 	}
 	else
 	{
-		printf(" ttl=%hhu time=%.2f ms\n",
+		printf("%ld bytes from %s: icmp_seq=%d ttl=%hhu time=%.2f ms\n",
+			received_bytes - (ssize_t)IP_HEADER_SIZE,
+			buff, g_global_data.packets_transmitted,
 			ip->ip_ttl, (double)(time_diff) / 1000.0);
 	}
 }
@@ -153,14 +152,15 @@ void	send_and_receive_probe(int sckt,
 int	send_probes(int sckt)
 {
 	struct icmp_packet	out_packet;
-	struct icmp_packet	in_packet;	
+	//struct icmp_packet	in_packet;	
+	char				in_packet[IP_PACKET_SIZE];
 	struct msghdr		msghdr;	
 	struct iovec		iov;
 
 	ft_bzero(&in_packet, sizeof(in_packet));
 	ft_bzero(&msghdr, sizeof(msghdr));
 	iov.iov_base = &in_packet;
-	iov.iov_len = ICMP_PACKET_SIZE;
+	iov.iov_len = sizeof(in_packet);
 	msghdr.msg_iov = &iov;
 	msghdr.msg_iovlen = 1;
 

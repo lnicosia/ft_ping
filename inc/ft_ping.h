@@ -11,7 +11,7 @@
 #define PAYLOAD_SIZE		(size_t)56
 #define ICMP_HEADER_SIZE	sizeof(struct icmphdr)
 #define IP_HEADER_SIZE		sizeof(struct iphdr)
-#define ICMP_PACKET_SIZE	PAYLOAD_SIZE + ICMP_HEADER_SIZE
+#define ICMP_PACKET_SIZE	ICMP_HEADER_SIZE + PAYLOAD_SIZE
 #define IP_PACKET_SIZE		IP_HEADER_SIZE + ICMP_PACKET_SIZE
 
 typedef struct				s_global_data
