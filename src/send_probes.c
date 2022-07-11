@@ -92,7 +92,7 @@ void	print_received_packet_info(ssize_t received_bytes,
 	{
 		printf("[%ld.%ld] ", current_time.tv_sec, current_time.tv_usec);
 	}
-	if (icmphdr->type != ICMP_ECHOREPLY)
+	if (icmphdr->type != ICMP_ECHOREPLY && icmphdr->type != ICMP_ECHO)
 	{
 		print_response_error(received_bytes, ip, icmphdr);
 		g_global_data.packets_received--;
