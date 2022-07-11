@@ -55,6 +55,7 @@ void		print_addrinfo(struct addrinfo *ai)
 t_ip		resolve_hostname(char *hostname)
 {
 	t_ip	res;
+	int		ret;
 
 	struct addrinfo *ai;
 	struct addrinfo hints;
@@ -63,10 +64,10 @@ t_ip		resolve_hostname(char *hostname)
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_RAW;
 	ft_bzero(&res, sizeof(res));
-	if (getaddrinfo(hostname, NULL, &hints, &ai))
+	if ((ret = getaddrinfo(hostname, NULL, &hints, &ai)))
 	{
-		dprintf(STDERR_FILENO, "ft_ping: %s: Temporary failure in name resolution\n",
-			hostname);
+		dprintf(STDERR_FILENO, "ft_ping: %s: %s\n",
+			hostname, gai_strerror(ret));
 		free_and_exit_failure();
 	}
 	struct addrinfo *tmp = ai;

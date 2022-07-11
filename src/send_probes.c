@@ -124,10 +124,15 @@ void	send_and_receive_probe(int sckt,
 		(struct sockaddr*)&g_global_data.dst_ip.ip4,
 		sizeof(g_global_data.dst_ip.ip4)) <= 0)
 	{
-		perror("ft_ping: sendto");
+		perror("sendto");
 		close(sckt);
 		free_and_exit_failure();
 	}
+	if (g_global_data.packets_transmitted == 1)
+		printf("PING %s (%s) %ld(%ld) bytes of data.\n",
+		g_global_data.av, g_global_data.dst_ip.str4, PAYLOAD_SIZE, 
+			g_global_data.opt & OPT_MULTIPLE_ADDR ?
+				IP_PACKET_SIZE + 40 : IP_PACKET_SIZE);
 	if (g_global_data.opt & OPT_VERBOSE)
 	{
 		printf("Sending\n");
