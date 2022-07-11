@@ -3,5 +3,6 @@
 
 void	interrupt_sighandler(int value);
 void	alarm_sighandler(int value);
+void	quit_sighandler(int value);
 
 #endif

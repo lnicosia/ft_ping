@@ -7,10 +7,32 @@
 #include <netinet/ip.h>
 #include <stdio.h>
 
-/**	Print ping statistics before stopping the program
+/**	Print ping statistics after a SIGQUIT
 */
 
 void	print_statistics(void)
+{
+	double	packet_ratio = (double)g_global_data.packets_received
+		/ (double)g_global_data.packets_transmitted;
+	printf("%d/%d packets, %.f%% loss", g_global_data.packets_received,
+		g_global_data.packets_transmitted, 100 - (100 * packet_ratio));
+	if (g_global_data.packets_received == 0)
+	{
+		printf("\n");
+		return ;
+	}
+	double avg = (double)g_global_data.time_sum
+		/ (double)g_global_data.packets_received;
+	printf(", min/avg/ewma/max = %.3f/%.3f/%.3f/%.3f ms\n",
+			(double)g_global_data.min_time / 1000.0,
+			avg / 1000.0, g_global_data.ewma,
+			(double)g_global_data.max_time / 1000.0);
+}
+
+/**	Print ping statistics before stopping the program
+*/
+
+void	print_final_statistics(void)
 {
 	printf("\n--- %s ping statistics ---\n", g_global_data.av);
 	printf("%u packets transmitted, %u received,",
@@ -143,6 +165,11 @@ void	send_and_receive_probe(int sckt,
 			g_global_data.min_time = time_diff;
 		g_global_data.time_sum += time_diff;
 		g_global_data.square_sum += time_diff * time_diff;
+		if (g_global_data.packets_received == 1)
+			g_global_data.ewma = (double)time_diff / 1000.0;
+		else
+			g_global_data.ewma = EWMA_ALPHA * (double)time_diff / 1000.0
+				+ (1.0 - EWMA_ALPHA) * g_global_data.ewma;
 	}
 }
 
@@ -170,9 +197,15 @@ int	send_probes(int sckt)
 		//	Interrupt signal -> print stats, close socket and exit
 		if (g_global_data.interrupt_flag == 1)
 		{
-			print_statistics();
+			print_final_statistics();
 			close(sckt);
 			break ;
+		}
+		//	Quit signal -> print stats
+		if (g_global_data.quit_flag == 1)
+		{
+			g_global_data.quit_flag = 0;
+			print_statistics();
 		}
 		//	Alarm signal -> send a new echo and wait for an answer
 		if (g_global_data.alarm_flag == 1)

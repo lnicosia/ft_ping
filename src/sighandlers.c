@@ -13,3 +13,9 @@ void	alarm_sighandler(int value)
 	(void)value;
 	g_global_data.alarm_flag = 1;
 }
+
+void	quit_sighandler(int value)
+{
+	(void)value;
+	g_global_data.quit_flag = 1;
+}

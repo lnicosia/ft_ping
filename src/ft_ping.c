@@ -73,7 +73,8 @@ int	ft_ping(int ac, char **av)
 		return 2;
 	}
 	if (signal(SIGINT, &interrupt_sighandler) == SIG_ERR
-		|| signal(SIGALRM, &alarm_sighandler) == SIG_ERR)
+		|| signal(SIGALRM, &alarm_sighandler) == SIG_ERR
+		|| signal(SIGQUIT, &quit_sighandler) == SIG_ERR)
 	{
 		perror("signal");
 		return -1;

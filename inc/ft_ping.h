@@ -14,10 +14,10 @@
 #define ICMP_PACKET_SIZE	ICMP_HEADER_SIZE + PAYLOAD_SIZE
 #define IP_PACKET_SIZE		IP_HEADER_SIZE + ICMP_PACKET_SIZE
 
+#define EWMA_ALPHA			0.125
+
 typedef struct				s_global_data
 {
-	volatile sig_atomic_t	interrupt_flag;
-	volatile sig_atomic_t	alarm_flag;
 	unsigned long long		opt;
 	char					*av;
 	t_ip					src_ip;
@@ -32,9 +32,12 @@ typedef struct				s_global_data
 	suseconds_t				max_time;
 	suseconds_t				time_sum;
 	suseconds_t				square_sum;
+	double					ewma;
 	uint16_t				packets_transmitted;
 	uint16_t				packets_received;
-	char					padding[4];
+	volatile sig_atomic_t	interrupt_flag;
+	volatile sig_atomic_t	alarm_flag;
+	volatile sig_atomic_t	quit_flag;
 }							t_global_data;
 
 EXTERN t_global_data		g_global_data;
