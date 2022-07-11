@@ -24,7 +24,7 @@ t_global_data	init_global_data(void)
 	res.alarm_flag = 1;
 	res.min_time = 1000000;
 	res.timeout.tv_sec = 1;
-	res.timeout.tv_usec = 1;
+	res.timeout.tv_usec = 0;
 	return res;
 }
 
@@ -61,7 +61,7 @@ int	ft_ping(int ac, char **av)
 	int ret = parse_ping_options(ac, av);
 	if (ret != 0)
 	{
-		//	Version print
+		//	Version print (-V)
 		if (ret == 3)
 			return 0;
 		//	Error

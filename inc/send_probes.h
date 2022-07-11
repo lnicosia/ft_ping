@@ -16,6 +16,7 @@ struct				icmp_packet
 int					send_probes(int sckt);
 void				print_icmp_header(struct icmphdr *header);
 void				print_ip4_header(struct ip *header);
-void				print_response_error(struct ip *ip, struct icmphdr *icmphdr);
+void				print_response_error(ssize_t received_bytes,
+	struct ip *ip, struct icmphdr *icmphdr);
 
 #endif

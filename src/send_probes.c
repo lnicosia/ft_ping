@@ -71,7 +71,7 @@ void	print_received_packet_info(ssize_t received_bytes,
 	}
 	if (icmphdr->type != ICMP_ECHOREPLY)
 	{
-		print_response_error(ip, icmphdr);
+		print_response_error(received_bytes, ip, icmphdr);
 		g_global_data.packets_received--;
 		g_global_data.errors++;
 	}
@@ -114,7 +114,8 @@ void	send_and_receive_probe(int sckt,
 	{
 		if (g_global_data.opt & OPT_VERBOSE)
 		{
-			perror("recvmsg");
+			perror("\e[31mrecvmsg");
+			dprintf(STDERR_FILENO, "\e[0m");
 		}
 		else if (g_global_data.opt & OPT_V)
 		{
