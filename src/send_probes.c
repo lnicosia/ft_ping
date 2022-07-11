@@ -20,8 +20,13 @@ void	print_statistics(void)
 		/ (double)g_global_data.packets_transmitted;
 	if (g_global_data.errors > 0)
 		printf(" +%ld errors,", g_global_data.errors);
-	printf(" %.f%% packet loss, time %dms\n",
-		100 - (100 * packet_ratio), 0);
+	suseconds_t	diff = 
+		(g_global_data.last_probe.tv_sec * 1000000
+		+ g_global_data.last_probe.tv_usec) -
+		(g_global_data.start_time.tv_sec * 1000000
+		+ g_global_data.start_time.tv_usec);
+	printf(" %.f%% packet loss, time %ldms\n",
+		100 - (100 * packet_ratio), diff / 1000);
 	double avg = (double)g_global_data.time_sum
 		/ (double)g_global_data.packets_received;
 	double mdev = ft_sqrt((double)g_global_data.square_sum
@@ -117,9 +122,6 @@ void	send_and_receive_probe(int sckt,
 			perror("\e[31mrecvmsg");
 			dprintf(STDERR_FILENO, "\e[0m");
 		}
-		else if (g_global_data.opt & OPT_V)
-		{
-		}
 	}
 	else //	We received a message!
 	{
@@ -133,6 +135,7 @@ void	send_and_receive_probe(int sckt,
 		//	Compare current time to when we sent the packet 
 		if (gettimeofday(&recv_timeval, NULL) == -1)
 			dprintf(STDERR_FILENO, "ft_ping: gettimeofday error\n");
+		g_global_data.last_probe = recv_timeval;
 		recv_time = recv_timeval.tv_sec * 1000000 + recv_timeval.tv_usec;
 		time_diff = recv_time - send_time;
 		print_received_packet_info(received_bytes, recv_timeval, time_diff,
@@ -153,7 +156,6 @@ void	send_and_receive_probe(int sckt,
 int	send_probes(int sckt)
 {
 	struct icmp_packet	out_packet;
-	//struct icmp_packet	in_packet;	
 	char				in_packet[IP_PACKET_SIZE];
 	struct msghdr		msghdr;	
 	struct iovec		iov;
@@ -164,6 +166,7 @@ int	send_probes(int sckt)
 	iov.iov_len = sizeof(in_packet);
 	msghdr.msg_iov = &iov;
 	msghdr.msg_iovlen = 1;
+	gettimeofday(&g_global_data.start_time, NULL);
 
 	//	Send out_packets while we can
 	while (1)
