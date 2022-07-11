@@ -54,12 +54,6 @@ int		check_opt(char *c, char **av, int i)
 			}
 		}
 	}
-	else if (*c == '6')
-	{
-		g_global_data.opt |= OPT_IP6;
-		dprintf(STDERR_FILENO, "connect: Network is unreachable\n");
-		return 2;
-	}
 	else if (*c != 'e')
 	{
 		dprintf(STDERR_FILENO, "ft_ping: invalid option -- '%s'\n", c);
