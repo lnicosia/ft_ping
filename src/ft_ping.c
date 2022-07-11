@@ -89,8 +89,9 @@ int	ft_ping(int ac, char **av)
 	g_global_data.src_ip = resolve_hostname(src_ip_name);
 	g_global_data.dst_ip = resolve_hostname(g_global_data.av);
 	printf("PING %s (%s) %ld(%ld) bytes of data.\n",
-	g_global_data.av, g_global_data.dst_ip.str4,
-		PAYLOAD_SIZE, IP_PACKET_SIZE);
+	g_global_data.av, g_global_data.dst_ip.str4, PAYLOAD_SIZE, 
+		g_global_data.opt & OPT_MULTIPLE_ADDR ?
+			IP_PACKET_SIZE + 40 : IP_PACKET_SIZE);
 	int	sckt = init_socket();
 	if (sckt == -1)
 		return 2;

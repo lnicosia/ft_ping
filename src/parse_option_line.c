@@ -120,7 +120,11 @@ int		parse_ping_options(int ac, char **av)
 				return (ret);
 		}
 		else if (!(i - 1 > 0 && ft_strequ(av[i - 1], "-t")))
+		{
+			if (g_global_data.av != 0)
+				g_global_data.opt |= OPT_MULTIPLE_ADDR;
 			g_global_data.av = av[i];
+		}
 		i++;
 	}
 	if (g_global_data.av == NULL)
