@@ -20,11 +20,7 @@ void	print_statistics(void)
 		/ (double)g_global_data.packets_transmitted;
 	if (g_global_data.errors > 0)
 		printf(" +%ld errors,", g_global_data.errors);
-	suseconds_t	diff = 
-		(g_global_data.last_probe.tv_sec * 1000000
-		+ g_global_data.last_probe.tv_usec) -
-		(g_global_data.start_time.tv_sec * 1000000
-		+ g_global_data.start_time.tv_usec);
+	suseconds_t	diff = g_global_data.last_probe - g_global_data.start_time;
 	printf(" %.f%% packet loss, time %ldms\n",
 		100 - (100 * packet_ratio), diff / 1000);
 	double avg = (double)g_global_data.time_sum
@@ -99,6 +95,7 @@ void	send_and_receive_probe(int sckt,
 	ssize_t			received_bytes;
 
 	//	Set out packet data
+	alarm(1);
 	set_out_packet_data(out_packet);
 	send_time = get_time();
 	if (sendto(sckt, out_packet, sizeof(*out_packet), 0,
@@ -114,6 +111,7 @@ void	send_and_receive_probe(int sckt,
 		printf("Sending\n");
 		print_icmp_header(&out_packet->header);
 	}
+	g_global_data.last_probe = get_time();
 	received_bytes = recvmsg(sckt, msghdr, 0);
 	if (received_bytes == -1)
 	{
@@ -133,10 +131,8 @@ void	send_and_receive_probe(int sckt,
 		}
 		g_global_data.packets_received++;
 		//	Compare current time to when we sent the packet 
-		if (gettimeofday(&recv_timeval, NULL) == -1)
-			dprintf(STDERR_FILENO, "ft_ping: gettimeofday error\n");
-		g_global_data.last_probe = recv_timeval;
-		recv_time = recv_timeval.tv_sec * 1000000 + recv_timeval.tv_usec;
+		recv_time = get_time();
+		//recv_time = recv_timeval.tv_sec * 1000000 + recv_timeval.tv_usec;
 		time_diff = recv_time - send_time;
 		print_received_packet_info(received_bytes, recv_timeval, time_diff,
 			msghdr);
@@ -166,7 +162,7 @@ int	send_probes(int sckt)
 	iov.iov_len = sizeof(in_packet);
 	msghdr.msg_iov = &iov;
 	msghdr.msg_iovlen = 1;
-	gettimeofday(&g_global_data.start_time, NULL);
+	g_global_data.start_time = get_time();
 
 	//	Send out_packets while we can
 	while (1)
@@ -183,7 +179,6 @@ int	send_probes(int sckt)
 		{
 			g_global_data.alarm_flag = 0;
 			send_and_receive_probe(sckt, &out_packet, &msghdr);
-			alarm(1);
 		}
 	}
 	return 0;

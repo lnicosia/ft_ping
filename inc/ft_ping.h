@@ -26,8 +26,8 @@ typedef struct				s_global_data
 	size_t					packet_size;
 	size_t					errors;
 	struct timeval			timeout;
-	struct timeval			start_time;
-	struct timeval			last_probe;
+	suseconds_t				start_time;
+	suseconds_t				last_probe;
 	suseconds_t				min_time;
 	suseconds_t				max_time;
 	suseconds_t				time_sum;
