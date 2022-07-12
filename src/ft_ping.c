@@ -62,7 +62,7 @@ int	ft_ping(int ac, char **av)
 	if (ret != 0)
 	{
 		//	Version print (-V)
-		if (ret == 3)
+		if (ret == PRINT_VERSION)
 			return 0;
 		//	Error
 		return ret;

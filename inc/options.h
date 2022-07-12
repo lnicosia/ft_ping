@@ -8,6 +8,9 @@
 # define OPT_VERBOSE			(1UL << 4)
 # define OPT_MULTIPLE_ADDR		(1UL << 5)
 
+# define OPTION_ERROR 2
+# define PRINT_VERSION 3
+
 int	parse_ping_options(int ac, char **av);
 
 #endif

@@ -8,19 +8,19 @@ int		print_version(void)
 	printf("lnicosia's ft_ping version 1.0\n");
 	printf("This program is free software; you may redistribute it\n");
 	printf("This program has absolutely no warranty\n");
-	return 3;
+	return PRINT_VERSION;
 }
 
 int		print_usage_stdin(void)
 {
 	printf("Usage: ft_ping [-DhvV] [-t ttl] destination\n");
-	return 2;
+	return OPTION_ERROR;
 }
 
 int		print_usage_stderr(void)
 {
 	dprintf(STDERR_FILENO, "Usage: ft_ping [-DhvV] [-t ttl] destination\n");
-	return 2;
+	return OPTION_ERROR;
 }
 
 int		check_opt(char *c, char **av, int i)
@@ -50,7 +50,7 @@ int		check_opt(char *c, char **av, int i)
 			{
 				dprintf(STDERR_FILENO, "ft_ping: ttl %ld out of range\n",
 					g_global_data.ttl);
-				return 2;
+				return OPTION_ERROR;
 			}
 		}
 	}
@@ -97,7 +97,7 @@ int		parse_option_line(char *av, char **full_av, int i)
 **	Checks if the given string is an option line (starting with '-')
 */
 
-int		is_arg_an_option_line(char *av)
+static int		is_arg_an_option_line(char *av)
 {
 	return (ft_strlen(av) > 1 && av[0] == '-');
 }
@@ -106,7 +106,7 @@ int		is_arg_an_option_line(char *av)
 **	Parse all the options by checking arguments starting with '-'
 */
 
-int		parse_ping_options(int ac, char **av)
+int		parse_ping_options2(int ac, char **av)
 {
 	int	i;
 	int	ret;
@@ -130,4 +130,68 @@ int		parse_ping_options(int ac, char **av)
 	if (g_global_data.av == NULL)
 		return print_usage_stderr();
 	return (0);
+}
+
+/*
+**	Parse all the options by checking arguments starting with '-'
+*/
+
+int		parse_ping_options(int ac, char **av)
+{
+	int			opt, option_index = 0;
+	char		*optarg = NULL;
+	const char	*optstring = "DhvVt:4";
+	static struct option long_options[] =
+	{
+		{"help",	no_argument,	0, 'h'},
+		{"version",	no_argument,	0, 'V'},
+		{"verbose",	no_argument,	0,	0 },
+		{"ttl",		no_argument,	0, 't'},
+		{0,			0,				0,	0 }
+	};
+
+	while ((opt = ft_getopt_long(ac, av, optstring, &optarg,
+		long_options, &option_index)) != -1)
+	{
+		switch (opt)
+		{
+			//	Specific long options that have no short equivalent
+			case 0:
+			{
+				if (ft_strequ(long_options[option_index].name, "verbose"))
+					g_global_data.opt |= OPT_VERBOSE;
+				break;
+			}
+			case 'v':
+				g_global_data.opt |= OPT_V;
+				break;
+			case 'D':
+				g_global_data.opt |= OPT_PRINT_TIMESTAMP;
+				break;
+			case '4':
+				g_global_data.opt |= OPT_IP4;
+				break;
+			case 't':
+				g_global_data.ttl = (size_t)ft_atoi(optarg);
+				break;
+			case 'h':
+				return print_usage_stderr();
+			case 'V':
+				return print_version();
+			case '?':
+				return print_usage_stderr();
+		}
+	}
+	//	Retrieve the last given IP address
+	for (int i = 1; i < ac; i++)
+	{
+		if (!is_arg_an_option_line(av[i]))
+		{
+			printf("addr = '%s'\n", av[i]);
+			if (g_global_data.av != 0)
+				g_global_data.opt |= OPT_MULTIPLE_ADDR;
+			g_global_data.av = av[i];
+		}
+	}
+	return 0;
 }
