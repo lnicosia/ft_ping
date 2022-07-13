@@ -163,6 +163,8 @@ int		parse_ping_options(int ac, char **av)
 				g_global_data.custom_interval = 1;
 				g_global_data.interval.tv_usec =
 					(suseconds_t)(fractional * 1000000);
+				if (interval < 10e-7)
+					g_global_data.interval.tv_usec = 1;
 				break;
 			}
 			case 'h':
