@@ -212,13 +212,14 @@ int	send_probes(int sckt)
 		}
 	}
 
+	unsigned int count = 0;
 	//	Send out_packets while we can
-	while (1)
+	while (g_global_data.count == 0 ||
+		count < g_global_data.count)
 	{
 		//	Interrupt signal -> print stats, close socket and exit
 		if (g_global_data.interrupt_flag == 1)
 		{
-			print_final_statistics();
 			close(sckt);
 			break ;
 		}
@@ -233,7 +234,9 @@ int	send_probes(int sckt)
 		{
 			g_global_data.alarm_flag = 0;
 			send_and_receive_probe(sckt, &out_packet, &msghdr);
+			count++;
 		}
 	}
+	print_final_statistics();
 	return 0;
 }

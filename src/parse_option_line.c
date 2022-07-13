@@ -4,6 +4,7 @@
 #include "ft_ping.h"
 #include <stdio.h>
 #include <math.h>
+#include <limits.h>
 
 int		print_version(void)
 {
@@ -26,76 +27,6 @@ int		print_usage_stderr(void)
 	return OPTION_ERROR;
 }
 
-int		check_opt(char *c, char **av, int i)
-{
-	if (*c == 'h')
-		return print_usage_stderr();
-	else if (*c == 'V')
-		return print_version();
-	else if (*c == 'v')
-		g_global_data.opt |= OPT_V;
-	else if (*c == '4')
-		g_global_data.opt |= OPT_IP4;
-	else if (*c == 'D')
-		g_global_data.opt |= OPT_PRINT_TIMESTAMP;
-	else if (*c == 't')
-	{
-		if (av[i + 1])
-		{
-			g_global_data.ttl = (size_t)ft_atoi(av[i + 1]);
-			if (g_global_data.ttl == 0)
-			{
-				dprintf(STDERR_FILENO, "ft_ping: can't set unicast time-to-live:" \
-					" Invalid argument\n");
-				return 2;
-			}
-			else if (g_global_data.ttl > 255)
-			{
-				dprintf(STDERR_FILENO, "ft_ping: ttl %ld out of range\n",
-					g_global_data.ttl);
-				return OPTION_ERROR;
-			}
-		}
-	}
-	else if (*c != 'e')
-	{
-		dprintf(STDERR_FILENO, "ft_ping: invalid option -- '%s'\n", c);
-		return print_usage_stderr();
-	}
-	return (0);
-}
-
-int		parse_option_line(char *av, char **full_av, int i)
-{
-	int	ret;
-
-	if (ft_strbegin(av, "--"))
-	{
-		if (ft_strequ(av, "--verbose"))
-			g_global_data.opt |= OPT_VERBOSE;
-		else if (ft_strnequ(av, "--help", ft_strlen(av)))
-			return print_usage_stdin();
-		else if (ft_strnequ(av, "--version", ft_strlen(av)))
-			return print_version();
-		else
-		{
-			dprintf(STDERR_FILENO, "ft_ping: invalid option '%s'\n", av);
-			return print_usage_stderr();
-		}
-	}
-	else
-	{
-		av++;
-		while (*av)
-		{
-			if ((ret = check_opt(av, full_av, i)) != 0)
-				return (ret);
-			av++;
-		}
-	}
-	return (0);
-}
-
 /*
 **	Parse all the options by checking arguments starting with '-'
 */
@@ -104,7 +35,7 @@ int		parse_ping_options(int ac, char **av)
 {
 	int			opt, option_index = 0;
 	char		*optarg = NULL;
-	const char	*optstring = "DhvVt:4i:";
+	const char	*optstring = "DhvVt:4i:c:";
 	static struct option long_options[] =
 	{
 		{"help",	no_argument,		0, 'h'},
@@ -112,6 +43,7 @@ int		parse_ping_options(int ac, char **av)
 		{"verbose",	no_argument,		0,	0 },
 		{"ttl",		required_argument,	0, 't'},
 		{"interval",required_argument,	0, 'i'},
+		{"count",	required_argument,	0, 'c'},
 		{0,			0,					0,	0 }
 	};
 
@@ -146,6 +78,18 @@ int		parse_ping_options(int ac, char **av)
 					return OPTION_ERROR;
 				}
 				g_global_data.ttl = (size_t)ttl;
+				break;
+			}
+			case 'c':
+			{
+				long long count = ft_atoll(optarg);
+				if (count <= 0 || count > INT_MAX)
+				{
+					ft_dprintf(STDERR_FILENO, "%s: bad number of packets" \
+						"to transmit.\n", av[0]);
+					return OPTION_ERROR;
+				}
+				g_global_data.count = (unsigned int)count;
 				break;
 			}
 			case 'i':
