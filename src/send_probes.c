@@ -159,8 +159,10 @@ void	send_and_receive_probe(int sckt,
 		}
 		g_global_data.packets_received++;
 		//	Compare current time to when we sent the packet 
-		recv_time = get_time();
-		//recv_time = recv_timeval.tv_sec * 1000000 + recv_timeval.tv_usec;
+		//	Get the time manually because option -D needs it
+		if (gettimeofday(&recv_timeval, NULL) == -1)
+			perror("ft_ping: gettimeofday");
+		recv_time = recv_timeval.tv_sec * 1000000 + recv_timeval.tv_usec;
 		time_diff = recv_time - send_time;
 		print_received_packet_info(received_bytes, recv_timeval, time_diff,
 			msghdr);
