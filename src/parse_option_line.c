@@ -1,7 +1,9 @@
 #include "options.h"
 #include "libft.h"
+#include "libmft.h"
 #include "ft_ping.h"
 #include <stdio.h>
+#include <math.h>
 
 int		print_version(void)
 {
@@ -13,13 +15,14 @@ int		print_version(void)
 
 int		print_usage_stdin(void)
 {
-	printf("Usage: ft_ping [-DhvV] [-t ttl] destination\n");
+	printf("Usage: ft_ping [-DhvV] [-i interval] [-t ttl] destination\n");
 	return OPTION_ERROR;
 }
 
 int		print_usage_stderr(void)
 {
-	dprintf(STDERR_FILENO, "Usage: ft_ping [-DhvV] [-t ttl] destination\n");
+	dprintf(STDERR_FILENO, "Usage: ft_ping [-DhvV] [-i interval] [-t ttl]");
+	dprintf(STDERR_FILENO, " destination\n");
 	return OPTION_ERROR;
 }
 
@@ -101,13 +104,14 @@ int		parse_ping_options(int ac, char **av)
 {
 	int			opt, option_index = 0;
 	char		*optarg = NULL;
-	const char	*optstring = "DhvVt:4";
+	const char	*optstring = "DhvVt:4i:";
 	static struct option long_options[] =
 	{
 		{"help",	no_argument,		0, 'h'},
 		{"version",	no_argument,		0, 'V'},
 		{"verbose",	no_argument,		0,	0 },
 		{"ttl",		required_argument,	0, 't'},
+		{"interval",required_argument,	0, 'i'},
 		{0,			0,					0,	0 }
 	};
 
@@ -142,6 +146,23 @@ int		parse_ping_options(int ac, char **av)
 					return OPTION_ERROR;
 				}
 				g_global_data.ttl = (size_t)ttl;
+				break;
+			}
+			case 'i':
+			{
+				double	interval = ft_atof(optarg);
+				if (interval < 0 || interval > 2147482)
+				{
+					ft_dprintf(STDERR_FILENO, "%s: bad timing interval\n",
+						av[0], interval);
+					return OPTION_ERROR;
+				}
+				double	integral;
+				double	fractional = modf(interval, &integral);
+				g_global_data.interval.tv_sec = (time_t)integral;
+				g_global_data.custom_interval = 1;
+				g_global_data.interval.tv_usec =
+					(suseconds_t)(fractional * 1000000);
 				break;
 			}
 			case 'h':

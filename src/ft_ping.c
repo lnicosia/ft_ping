@@ -25,6 +25,8 @@ t_global_data	init_global_data(void)
 	res.min_time = 1000000;
 	res.timeout.tv_sec = 1;
 	res.timeout.tv_usec = 0;
+	res.interval.tv_sec = 0;
+	res.interval.tv_usec = 1000000;
 	return res;
 }
 

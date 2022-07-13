@@ -117,7 +117,8 @@ void	send_and_receive_probe(int sckt,
 	ssize_t			received_bytes;
 
 	//	Set out packet data
-	alarm(1);
+	if (g_global_data.custom_interval == 0)
+		alarm(1);
 	set_out_packet_data(out_packet);
 	send_time = get_time();
 	if (sendto(sckt, out_packet, sizeof(*out_packet), 0,
@@ -195,6 +196,19 @@ int	send_probes(int sckt)
 	msghdr.msg_iov = &iov;
 	msghdr.msg_iovlen = 1;
 	g_global_data.start_time = get_time();
+
+	if (g_global_data.custom_interval == 1)
+	{
+		struct itimerval timer;
+		timer.it_interval = g_global_data.interval;
+		timer.it_value = g_global_data.interval;
+		if (setitimer(ITIMER_REAL, &timer, NULL))
+		{
+			perror("ping: setitimer");
+			close(sckt);
+			return 2;
+		}
+	}
 
 	//	Send out_packets while we can
 	while (1)

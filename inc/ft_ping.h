@@ -26,6 +26,7 @@ typedef struct				s_global_data
 	size_t					packet_size;
 	size_t					errors;
 	struct timeval			timeout;
+	struct timeval			interval;
 	suseconds_t				start_time;
 	suseconds_t				last_probe;
 	suseconds_t				min_time;
@@ -35,9 +36,11 @@ typedef struct				s_global_data
 	double					ewma;
 	uint16_t				packets_transmitted;
 	uint16_t				packets_received;
+	int						custom_interval;
 	volatile sig_atomic_t	interrupt_flag;
 	volatile sig_atomic_t	alarm_flag;
 	volatile sig_atomic_t	quit_flag;
+	char					padding[4];
 }							t_global_data;
 
 EXTERN t_global_data		g_global_data;
