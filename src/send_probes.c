@@ -6,6 +6,7 @@
 #include "time_utils.h"
 #include <netinet/ip.h>
 #include <stdio.h>
+#include <errno.h>
 
 /**	Print ping statistics after a SIGQUIT
 */
@@ -140,7 +141,9 @@ void	send_and_receive_probe(int sckt,
 		print_icmp_header(&out_packet->header);
 	}
 	g_global_data.last_probe = get_time();
-	received_bytes = recvmsg(sckt, msghdr, 0);
+	//	If recvmsg was interrupted by a too fast SIGALARM, relaunch it
+	while ((received_bytes = recvmsg(sckt, msghdr, 0)) == -1 && errno == EINTR)
+		continue;
 	if (received_bytes == -1)
 	{
 		if (g_global_data.opt & OPT_VERBOSE)
@@ -199,6 +202,8 @@ int	send_probes(int sckt)
 	msghdr.msg_iovlen = 1;
 	g_global_data.start_time = get_time();
 
+	//	If -i was given, use this instead of alarm() to
+	//	set timers < 1sec
 	if (g_global_data.custom_interval == 1)
 	{
 		struct itimerval timer;
