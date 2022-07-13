@@ -94,45 +94,6 @@ int		parse_option_line(char *av, char **full_av, int i)
 }
 
 /*
-**	Checks if the given string is an option line (starting with '-')
-*/
-
-static int		is_arg_an_option_line(char *av)
-{
-	return (ft_strlen(av) > 1 && av[0] == '-');
-}
-
-/*
-**	Parse all the options by checking arguments starting with '-'
-*/
-
-int		parse_ping_options2(int ac, char **av)
-{
-	int	i;
-	int	ret;
-	
-	i = 1;
-	while (i < ac)
-	{
-		if (is_arg_an_option_line(av[i]))
-		{
-			if ((ret = parse_option_line(av[i], av, i)) != 0)
-				return (ret);
-		}
-		else if (!(i - 1 > 0 && ft_strequ(av[i - 1], "-t")))
-		{
-			if (g_global_data.av != 0)
-				g_global_data.opt |= OPT_MULTIPLE_ADDR;
-			g_global_data.av = av[i];
-		}
-		i++;
-	}
-	if (g_global_data.av == NULL)
-		return print_usage_stderr();
-	return (0);
-}
-
-/*
 **	Parse all the options by checking arguments starting with '-'
 */
 
@@ -143,11 +104,11 @@ int		parse_ping_options(int ac, char **av)
 	const char	*optstring = "DhvVt:4";
 	static struct option long_options[] =
 	{
-		{"help",	no_argument,	0, 'h'},
-		{"version",	no_argument,	0, 'V'},
-		{"verbose",	no_argument,	0,	0 },
-		{"ttl",		no_argument,	0, 't'},
-		{0,			0,				0,	0 }
+		{"help",	no_argument,		0, 'h'},
+		{"version",	no_argument,		0, 'V'},
+		{"verbose",	no_argument,		0,	0 },
+		{"ttl",		required_argument,	0, 't'},
+		{0,			0,					0,	0 }
 	};
 
 	while ((opt = ft_getopt_long(ac, av, optstring, &optarg,
@@ -185,9 +146,8 @@ int		parse_ping_options(int ac, char **av)
 	//	Retrieve the last given IP address
 	for (int i = 1; i < ac; i++)
 	{
-		if (!is_arg_an_option_line(av[i]))
+		if (!is_arg_an_opt(av, i, optstring, long_options))
 		{
-			printf("addr = '%s'\n", av[i]);
 			if (g_global_data.av != 0)
 				g_global_data.opt |= OPT_MULTIPLE_ADDR;
 			g_global_data.av = av[i];
