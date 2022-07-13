@@ -133,8 +133,17 @@ int		parse_ping_options(int ac, char **av)
 				g_global_data.opt |= OPT_IP4;
 				break;
 			case 't':
-				g_global_data.ttl = (size_t)ft_atoi(optarg);
+			{
+				int	ttl = ft_atoi(optarg);
+				if (ttl < 0 || ttl > 255)
+				{
+					ft_dprintf(STDERR_FILENO, "%s: ttl %d out of range\n",
+						av[0], ttl);
+					return OPTION_ERROR;
+				}
+				g_global_data.ttl = (size_t)ttl;
 				break;
+			}
 			case 'h':
 				return print_usage_stderr();
 			case 'V':

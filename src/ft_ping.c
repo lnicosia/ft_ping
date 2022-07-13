@@ -41,7 +41,7 @@ int	init_socket(void)
 	if (setsockopt(sckt, SOL_IP, IP_TTL,
 		&g_global_data.ttl, sizeof(g_global_data.ttl)) != 0)
 	{
-		perror("ft_ping: setsockopt");
+		perror("ft_ping: can't set unicast time-to-live");
 		close(sckt);
 		return -1;
 	}
