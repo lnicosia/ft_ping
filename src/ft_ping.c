@@ -27,6 +27,9 @@ t_global_data	init_global_data(void)
 	res.timeout.tv_usec = 0;
 	res.interval.tv_sec = 0;
 	res.interval.tv_usec = 1000000;
+	res.payload_size = 56;
+	res.icmp_packet_size = res.payload_size + ICMP_HEADER_SIZE;
+	res.ip_packet_size = res.icmp_packet_size + IP_HEADER_SIZE;
 	return res;
 }
 
@@ -34,27 +37,27 @@ t_global_data	g_global_data;
 
 int	init_socket(void)
 {
-	int	sckt = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-	if (sckt == -1)
+	g_global_data.sckt = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	if (g_global_data.sckt == -1)
 	{
 		perror("ft_ping: socket");
 		return -1;
 	}
-	if (setsockopt(sckt, SOL_IP, IP_TTL,
+	if (setsockopt(g_global_data.sckt, SOL_IP, IP_TTL,
 		&g_global_data.ttl, sizeof(g_global_data.ttl)) != 0)
 	{
 		perror("ft_ping: can't set unicast time-to-live");
-		close(sckt);
+		close(g_global_data.sckt);
 		return -1;
 	}
-	if (setsockopt(sckt, SOL_SOCKET, SO_RCVTIMEO,
+	if (setsockopt(g_global_data.sckt, SOL_SOCKET, SO_RCVTIMEO,
 		&g_global_data.timeout, sizeof(g_global_data.timeout)) != 0)
 	{
 		perror("ft_ping: setsockopt");
-		close(sckt);
+		close(g_global_data.sckt);
 		return -1;
 	}
-	return sckt;
+	return g_global_data.sckt;
 }
 
 int	ft_ping(int ac, char **av)
@@ -91,11 +94,14 @@ int	ft_ping(int ac, char **av)
 	g_global_data.src_ip = resolve_hostname(src_ip_name);
 	g_global_data.dst_ip = resolve_hostname(g_global_data.av);
 	//	If it is a direct IP, do not try to resolve when receiving packets
-	if (ft_strequ(g_global_data.dst_ip.str4, g_global_data.av))
+	if (ft_strequ(g_global_data.dst_ip.str4, g_global_data.av)
+		|| ft_strequ(g_global_data.av, "0"))
 		g_global_data.direct_ip = 1;
-	int	sckt = init_socket();
-	if (sckt == -1)
+	g_global_data.sckt = init_socket();
+	if (g_global_data.sckt == -1)
 		return 2;
-	send_probes(sckt);
+	if (send_probes())
+		free_and_exit_failure();
+	free_and_exit_success();
 	return 0;
 }

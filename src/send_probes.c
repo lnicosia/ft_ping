@@ -65,17 +65,19 @@ void	print_final_statistics(void)
 
 void	set_out_packet_data(struct icmp_packet* out_packet)
 {
-	ft_bzero(out_packet, sizeof(*out_packet));
+	ft_bzero(&out_packet->header, ICMP_HEADER_SIZE);
+	ft_bzero(out_packet->payload, g_global_data.payload_size);
 	out_packet->header.type = ICMP_ECHO;
 	out_packet->header.code = 0;
 	out_packet->header.un.echo.id = 4242;
 	unsigned int i;
-	for (i = 0; i < sizeof(out_packet->payload) - 1; i++)
+	for (i = 0; i < g_global_data.payload_size - 1; i++)
 		out_packet->payload[i] = (char)(i + '0');
 	out_packet->payload[i] = '\0';
 	//	Update sequence (= received packets count) and checksum
 	out_packet->header.un.echo.sequence = ++g_global_data.packets_transmitted;
-	out_packet->header.checksum = checksum(out_packet, sizeof(*out_packet));
+	out_packet->header.checksum = checksum(out_packet,
+		g_global_data.icmp_packet_size);
 }
 
 /**	Print received packet info: size, ip, etc
@@ -126,8 +128,7 @@ void	print_received_packet_info(ssize_t received_bytes,
 	}
 }
 
-void	send_and_receive_probe(int sckt,
- struct icmp_packet *out_packet, struct msghdr *msghdr)
+void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghdr)
 {
 	suseconds_t		send_time;
 	suseconds_t		recv_time;
@@ -140,27 +141,27 @@ void	send_and_receive_probe(int sckt,
 		alarm(1);
 	set_out_packet_data(out_packet);
 	send_time = get_time();
-	if (sendto(sckt, out_packet, sizeof(*out_packet), 0,
-		(struct sockaddr*)&g_global_data.dst_ip.ip4,
-		sizeof(g_global_data.dst_ip.ip4)) <= 0)
-	{
-		perror("sendto");
-		close(sckt);
-		free_and_exit_failure();
-	}
-	if (g_global_data.packets_transmitted == 1)
-		printf("PING %s (%s) %ld(%ld) bytes of data.\n",
-		g_global_data.av, g_global_data.dst_ip.str4, PAYLOAD_SIZE, 
-			g_global_data.opt & OPT_MULTIPLE_ADDR ?
-				IP_PACKET_SIZE + 40 : IP_PACKET_SIZE);
 	if (g_global_data.opt & OPT_VERBOSE)
 	{
 		printf("Sending\n");
 		print_icmp_header(&out_packet->header);
 	}
+	if (sendto(g_global_data.sckt, out_packet, g_global_data.icmp_packet_size,
+		0, (struct sockaddr*)&g_global_data.dst_ip.ip4,
+		sizeof(g_global_data.dst_ip.ip4)) <= 0)
+	{
+		perror("sendto");
+		free_and_exit_failure();
+	}
+	if (g_global_data.packets_transmitted == 1)
+		printf("PING %s (%s) %ld(%ld) bytes of data.\n",
+		g_global_data.av, g_global_data.dst_ip.str4, g_global_data.payload_size, 
+			g_global_data.opt & OPT_MULTIPLE_ADDR ?
+				g_global_data.ip_packet_size + 40 : g_global_data.ip_packet_size);
 	g_global_data.last_probe = get_time();
 	//	If recvmsg was interrupted by a too fast SIGALARM, relaunch it
-	while ((received_bytes = recvmsg(sckt, msghdr, 0)) == -1 && errno == EINTR)
+	while ((received_bytes = recvmsg(g_global_data.sckt, msghdr, 0)) == -1
+		&& errno == EINTR)
 		continue;
 	if (received_bytes == -1)
 	{
@@ -205,17 +206,23 @@ void	send_and_receive_probe(int sckt,
 /**	Send ICMP Echo out_packets to destination IP
 */
 
-int	send_probes(int sckt)
+int	send_probes(void)
 {
-	struct icmp_packet	out_packet;
-	char				in_packet[IP_PACKET_SIZE];
 	struct msghdr		msghdr;	
 	struct iovec		iov;
 
-	ft_bzero(&in_packet, sizeof(in_packet));
+	g_global_data.out_packet.payload =
+		(char*)malloc(g_global_data.payload_size);
+	if (g_global_data.out_packet.payload == NULL)
+		free_and_exit_failure();
+	g_global_data.in_packet =
+		(char*)malloc(g_global_data.ip_packet_size);
+	if (g_global_data.in_packet == NULL)
+		free_and_exit_failure();
+	ft_bzero(g_global_data.in_packet, g_global_data.ip_packet_size);
 	ft_bzero(&msghdr, sizeof(msghdr));
-	iov.iov_base = &in_packet;
-	iov.iov_len = sizeof(in_packet);
+	iov.iov_base = g_global_data.in_packet;
+	iov.iov_len = g_global_data.ip_packet_size;
 	msghdr.msg_iov = &iov;
 	msghdr.msg_iovlen = 1;
 	g_global_data.start_time = get_time();
@@ -230,7 +237,6 @@ int	send_probes(int sckt)
 		if (setitimer(ITIMER_REAL, &timer, NULL))
 		{
 			perror("ping: setitimer");
-			close(sckt);
 			return 2;
 		}
 	}
@@ -243,7 +249,6 @@ int	send_probes(int sckt)
 		//	Interrupt signal -> print stats, close socket and exit
 		if (g_global_data.interrupt_flag == 1)
 		{
-			close(sckt);
 			break ;
 		}
 		//	Quit signal -> print stats
@@ -256,7 +261,7 @@ int	send_probes(int sckt)
 		if (g_global_data.alarm_flag == 1)
 		{
 			g_global_data.alarm_flag = 0;
-			send_and_receive_probe(sckt, &out_packet, &msghdr);
+			send_and_receive_probe(&g_global_data.out_packet, &msghdr);
 			count++;
 		}
 	}
