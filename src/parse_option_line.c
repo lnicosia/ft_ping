@@ -16,14 +16,14 @@ int		print_version(void)
 
 int		print_usage_stdin(void)
 {
-	printf("Usage: ft_ping [-DhvV] [-c count] [-i interval] [-s packetsize]");
+	printf("Usage: ft_ping [-aDhqvV] [-c count] [-i interval] [-s packetsize]");
 	printf(" [-t ttl] [--verbose] destination\n");
 	return OPTION_ERROR;
 }
 
 int		print_usage_stderr(void)
 {
-	dprintf(STDERR_FILENO, "Usage: ft_ping [-DhvV] [-c count] [-i interval] ");
+	dprintf(STDERR_FILENO, "Usage: ft_ping [-aDhqvV] [-c count] [-i interval] ");
 	dprintf(STDERR_FILENO, " [-s packetsize] [-t ttl] [--verbose] destination\n");
 	return OPTION_ERROR;
 }
@@ -36,9 +36,10 @@ int		parse_ping_options(int ac, char **av)
 {
 	int			opt, option_index = 0;
 	char		*optarg = NULL;
-	const char	*optstring = "DhvVt:4i:c:s:q";
+	const char	*optstring = "DhvVt:4i:c:s:qa";
 	static struct option long_options[] =
 	{
+		{"audible",	no_argument,		0, 'a'},
 		{"help",	no_argument,		0, 'h'},
 		{"version",	no_argument,		0, 'V'},
 		{"verbose",	no_argument,		0,	0 },
@@ -70,6 +71,9 @@ int		parse_ping_options(int ac, char **av)
 				break;
 			case 'q':
 				g_global_data.opt |= OPT_QUIET;
+				break;
+			case 'a':
+				g_global_data.opt |= OPT_AUDIBLE;
 				break;
 			case '4':
 				g_global_data.opt |= OPT_IP4;

@@ -132,10 +132,13 @@ void	print_received_packet_info(ssize_t received_bytes,
 			g_global_data.packets_transmitted,
 			ip->ip_ttl);
 		if ((size_t)received_bytes - IP_HEADER_SIZE != g_global_data.icmp_packet_size)
-			printf("(truncated)\n");
+			printf("(truncated)");
 		else
-			printf("time=%.2f ms\n",
+			printf("time=%.2f ms",
 				(double)(time_diff) / 1000.0);
+		if (g_global_data.opt & OPT_AUDIBLE)
+			printf("\a");
+		printf("\n");
 
 	}
 }
