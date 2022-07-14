@@ -16,13 +16,13 @@ int		print_version(void)
 
 int		print_usage_stdin(void)
 {
-	printf("Usage: ft_ping [-DhvV] [-i interval] [-t ttl] destination\n");
+	printf("Usage: ft_ping [-DhvV] [-c count] [-i interval] [-t ttl] destination\n");
 	return OPTION_ERROR;
 }
 
 int		print_usage_stderr(void)
 {
-	dprintf(STDERR_FILENO, "Usage: ft_ping [-DhvV] [-i interval] [-t ttl]");
+	dprintf(STDERR_FILENO, "Usage: ft_ping [-DhvV] [-c count] [-i interval] [-t ttl]");
 	dprintf(STDERR_FILENO, " destination\n");
 	return OPTION_ERROR;
 }
