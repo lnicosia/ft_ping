@@ -121,6 +121,8 @@ void	print_received_packet_info(ssize_t received_bytes,
 		{
 			perror("ft_ping: getnameinfo");
 		}
+		if (g_global_data.opt & OPT_QUIET)
+			return ;
 		printf("%ld bytes from ", received_bytes - (ssize_t)IP_HEADER_SIZE);
 		if (g_global_data.direct_ip == 1)
 			printf("%s", buff);

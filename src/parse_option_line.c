@@ -36,12 +36,13 @@ int		parse_ping_options(int ac, char **av)
 {
 	int			opt, option_index = 0;
 	char		*optarg = NULL;
-	const char	*optstring = "DhvVt:4i:c:s:";
+	const char	*optstring = "DhvVt:4i:c:s:q";
 	static struct option long_options[] =
 	{
 		{"help",	no_argument,		0, 'h'},
 		{"version",	no_argument,		0, 'V'},
 		{"verbose",	no_argument,		0,	0 },
+		{"quiet",	no_argument,		0, 'q'},
 		{"ttl",		required_argument,	0, 't'},
 		{"interval",required_argument,	0, 'i'},
 		{"count",	required_argument,	0, 'c'},
@@ -66,6 +67,9 @@ int		parse_ping_options(int ac, char **av)
 				break;
 			case 'D':
 				g_global_data.opt |= OPT_PRINT_TIMESTAMP;
+				break;
+			case 'q':
+				g_global_data.opt |= OPT_QUIET;
 				break;
 			case '4':
 				g_global_data.opt |= OPT_IP4;
