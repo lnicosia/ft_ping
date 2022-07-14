@@ -79,7 +79,8 @@ int		parse_ping_options(int ac, char **av)
 						av[0], packetsize);
 					return OPTION_ERROR;
 				}
-				if (packetsize > 65507)
+				//if (packetsize > 65507)
+				if (packetsize > 3336)
 				{
 					dprintf(STDERR_FILENO, "%s: packet size %lld is too large.",
 						av[0], packetsize);

@@ -70,10 +70,15 @@ void	set_out_packet_data(struct icmp_packet* out_packet)
 	out_packet->header.type = ICMP_ECHO;
 	out_packet->header.code = 0;
 	out_packet->header.un.echo.id = 4242;
-	unsigned int i;
-	for (i = 0; i < g_global_data.payload_size - 1; i++)
-		out_packet->payload[i] = (char)(i + '0');
-	out_packet->payload[i] = '\0';
+	if (g_global_data.payload_size > 0)
+	{
+		size_t i;
+		for (i = 0; i < g_global_data.payload_size - 1; i++)
+		{
+			out_packet->payload[i] = (char)(i + '0');
+		}
+		out_packet->payload[i] = '\0';
+	}
 	//	Update sequence (= received packets count) and checksum
 	out_packet->header.un.echo.sequence = ++g_global_data.packets_transmitted;
 	out_packet->header.checksum = checksum(out_packet,
@@ -121,9 +126,14 @@ void	print_received_packet_info(ssize_t received_bytes,
 			printf("%s", buff);
 		else
 			printf("%s (%s)", host, buff);
-		printf(": icmp_seq=%d ttl=%hhu time=%.2f ms\n",
+		printf(": icmp_seq=%d ttl=%hhu ",
 			g_global_data.packets_transmitted,
-			ip->ip_ttl, (double)(time_diff) / 1000.0);
+			ip->ip_ttl);
+		if ((size_t)received_bytes - IP_HEADER_SIZE != g_global_data.icmp_packet_size)
+			printf("(truncated)\n");
+		else
+			printf("time=%.2f ms\n",
+				(double)(time_diff) / 1000.0);
 
 	}
 }

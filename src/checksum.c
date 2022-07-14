@@ -1,13 +1,21 @@
 #include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
 
 uint16_t	checksum(void *ptr, int len)
 {
-	uint16_t *buf = (unsigned short*)ptr;
-	uint32_t	sum = 0;
+	uint16_t	*buf = (uint16_t*)ptr;
+	size_t		sum = 0;
 	uint16_t	res = 0;
 	
 	for ( ; len > 1 ; len -= 2)
 	{
+		/*printf("i = %d\n", i);
+		printf("len = %d\n", len);
+		printf("buf = %u\n", *buf);
+		printf("sum = %ld\n", sum);*/
+		//printf("i = %d\n", i);
+		//printf("buf = %hhu\n", *buf);
 		sum += *buf;
 		buf++;
 	}
