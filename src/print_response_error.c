@@ -38,7 +38,7 @@ void	print_response_error(ssize_t received_bytes,
 	}
 	else
 	{
-		if (g_global_data.direct_ip)
+		if (g_global_data.direct_ip == 1 || g_global_data.opt & OPT_NUMERIC_ONLY)
 			printf("From %s", buff);
 		else
 			printf("From %s (%s)", host, buff);

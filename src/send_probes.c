@@ -124,7 +124,7 @@ void	print_received_packet_info(ssize_t received_bytes,
 		if (g_global_data.opt & OPT_QUIET)
 			return ;
 		printf("%ld bytes from ", received_bytes - (ssize_t)IP_HEADER_SIZE);
-		if (g_global_data.direct_ip == 1)
+		if (g_global_data.direct_ip == 1 || g_global_data.opt & OPT_NUMERIC_ONLY)
 			printf("%s", buff);
 		else
 			printf("%s (%s)", host, buff);

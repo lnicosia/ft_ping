@@ -9,6 +9,7 @@
 # define OPT_MULTIPLE_ADDR		(1UL << 5)
 # define OPT_QUIET				(1UL << 6)
 # define OPT_AUDIBLE			(1UL << 7)
+# define OPT_NUMERIC_ONLY		(1UL << 8)
 
 # define OPTION_ERROR 2
 # define PRINT_VERSION 3
