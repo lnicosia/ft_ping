@@ -7,6 +7,7 @@
 #include <netinet/ip.h>
 #include <stdio.h>
 #include <errno.h>
+#include <netdb.h>
 
 /**	Print ping statistics after a SIGQUIT
 */
@@ -101,10 +102,27 @@ void	print_received_packet_info(ssize_t received_bytes,
 	}
 	else
 	{
-		printf("%ld bytes from %s: icmp_seq=%d ttl=%hhu time=%.2f ms\n",
-			received_bytes - (ssize_t)IP_HEADER_SIZE,
-			buff, g_global_data.packets_transmitted,
+		char	host[512];
+		char	serv[512];
+		struct sockaddr_in addr;
+		addr.sin_family = AF_INET;
+		addr.sin_port = 0;
+		addr.sin_addr = ip->ip_src;
+		struct sockaddr *final_addr = (struct sockaddr*)&addr;
+		if (getnameinfo(final_addr, sizeof(addr), host, sizeof(host),
+			serv, sizeof(serv), 0))
+		{
+			perror("ft_ping: getnameinfo");
+		}
+		printf("%ld bytes from ", received_bytes - (ssize_t)IP_HEADER_SIZE);
+		if (g_global_data.direct_ip == 1)
+			printf("%s", buff);
+		else
+			printf("%s (%s)", host, buff);
+		printf(": icmp_seq=%d ttl=%hhu time=%.2f ms\n",
+			g_global_data.packets_transmitted,
 			ip->ip_ttl, (double)(time_diff) / 1000.0);
+
 	}
 }
 
