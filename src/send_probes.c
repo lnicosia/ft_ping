@@ -191,7 +191,6 @@ void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghd
 	{
 		ft_bzero(g_global_data.in_packet, g_global_data.ip_packet_size);
 		received_bytes = recvmsg(g_global_data.sckt, msghdr, 0);
-		//	Only the first recvmsg is blocking
 		struct icmphdr *icmphdr = (struct icmphdr*)(msghdr->msg_iov->iov_base
 			+ IP_HEADER_SIZE);
 		if (received_bytes == -1)
@@ -205,7 +204,8 @@ void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghd
 		}
 		else //	We received a message!
 		{
-			if (icmphdr->un.echo.id != g_global_data.id)
+			if ((icmphdr->type == ICMP_ECHOREPLY || icmphdr->type == ICMP_ECHO)
+				&& icmphdr->un.echo.id != g_global_data.id)
 				continue;
 			if (g_global_data.opt & OPT_VERBOSE)
 			{
