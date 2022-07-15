@@ -3,6 +3,7 @@
 #include "send_probes.h"
 #include "ft_ping.h"
 #include "sighandlers.h"
+#include "time_utils.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -30,6 +31,7 @@ t_global_data	init_global_data(void)
 	res.payload_size = 56;
 	res.icmp_packet_size = res.payload_size + ICMP_HEADER_SIZE;
 	res.ip_packet_size = res.icmp_packet_size + IP_HEADER_SIZE;
+	res.id = (uint16_t)get_time();
 	return res;
 }
 

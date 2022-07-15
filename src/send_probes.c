@@ -69,7 +69,7 @@ void	set_out_packet_data(struct icmp_packet* out_packet)
 	ft_bzero(out_packet->payload, g_global_data.payload_size);
 	out_packet->header.type = ICMP_ECHO;
 	out_packet->header.code = 0;
-	out_packet->header.un.echo.id = 4242;
+	out_packet->header.un.echo.id = g_global_data.id;
 	if (g_global_data.payload_size > 0)
 	{
 		size_t i;
@@ -185,44 +185,55 @@ void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghd
 			g_global_data.opt & OPT_MULTIPLE_ADDR ?
 				g_global_data.ip_packet_size + 40 : g_global_data.ip_packet_size);
 	g_global_data.last_probe = get_time();
-	received_bytes = recvmsg(g_global_data.sckt, msghdr, 0);
-	if (received_bytes == -1)
+	while (1)
 	{
-		if (g_global_data.opt & OPT_VERBOSE)
+		ft_bzero(g_global_data.in_packet, g_global_data.ip_packet_size);
+		received_bytes = recvmsg(g_global_data.sckt, msghdr, 0);
+		//	Only the first recvmsg is blocking
+		struct icmphdr *icmphdr = (struct icmphdr*)(msghdr->msg_iov->iov_base
+			+ IP_HEADER_SIZE);
+		if (received_bytes == -1)
 		{
-			perror("\e[31mrecvmsg");
-			dprintf(STDERR_FILENO, "\e[0m");
+			if (g_global_data.opt & OPT_VERBOSE)
+			{
+				perror("\e[31mrecvmsg");
+				dprintf(STDERR_FILENO, "\e[0m");
+			}
+			break;
 		}
-	}
-	else //	We received a message!
-	{
-		if (g_global_data.opt & OPT_VERBOSE)
+		else //	We received a message!
 		{
-			printf("Receiving\n");
-			print_ip4_header(msghdr->msg_iov->iov_base);
-			print_icmp_header(msghdr->msg_iov->iov_base + IP_HEADER_SIZE);
+			if (icmphdr->un.echo.id != g_global_data.id)
+				continue;
+			if (g_global_data.opt & OPT_VERBOSE)
+			{
+				printf("Receiving\n");
+				print_ip4_header(msghdr->msg_iov->iov_base);
+				print_icmp_header(msghdr->msg_iov->iov_base + IP_HEADER_SIZE);
+			}
+			g_global_data.packets_received++;
+			//	Compare current time to when we sent the packet 
+			//	Get the time manually because option -D needs it
+			if (gettimeofday(&recv_timeval, NULL) == -1)
+				perror("ft_ping: gettimeofday");
+			recv_time = recv_timeval.tv_sec * 1000000 + recv_timeval.tv_usec;
+			time_diff = recv_time - send_time;
+			print_received_packet_info(received_bytes, recv_timeval, time_diff,
+				msghdr);
+			//	Update min, max and average timers
+			if (time_diff > g_global_data.max_time)
+				g_global_data.max_time = time_diff;
+			if (time_diff < g_global_data.min_time)
+				g_global_data.min_time = time_diff;
+			g_global_data.time_sum += time_diff;
+			g_global_data.square_sum += time_diff * time_diff;
+			if (g_global_data.packets_received == 1)
+				g_global_data.ewma = (double)time_diff / 1000.0;
+			else
+				g_global_data.ewma = EWMA_ALPHA * (double)time_diff / 1000.0
+					+ (1.0 - EWMA_ALPHA) * g_global_data.ewma;
+			break;
 		}
-		g_global_data.packets_received++;
-		//	Compare current time to when we sent the packet 
-		//	Get the time manually because option -D needs it
-		if (gettimeofday(&recv_timeval, NULL) == -1)
-			perror("ft_ping: gettimeofday");
-		recv_time = recv_timeval.tv_sec * 1000000 + recv_timeval.tv_usec;
-		time_diff = recv_time - send_time;
-		print_received_packet_info(received_bytes, recv_timeval, time_diff,
-			msghdr);
-		//	Update min, max and average timers
-		if (time_diff > g_global_data.max_time)
-			g_global_data.max_time = time_diff;
-		if (time_diff < g_global_data.min_time)
-			g_global_data.min_time = time_diff;
-		g_global_data.time_sum += time_diff;
-		g_global_data.square_sum += time_diff * time_diff;
-		if (g_global_data.packets_received == 1)
-			g_global_data.ewma = (double)time_diff / 1000.0;
-		else
-			g_global_data.ewma = EWMA_ALPHA * (double)time_diff / 1000.0
-				+ (1.0 - EWMA_ALPHA) * g_global_data.ewma;
 	}
 }
 

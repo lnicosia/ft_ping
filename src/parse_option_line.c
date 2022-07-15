@@ -133,7 +133,7 @@ int		parse_ping_options(int ac, char **av)
 			case 'i':
 			{
 				double	interval = ft_atof(optarg);
-				if (interval < 0 || interval > 2147482)
+				if (interval < 0 || interval > (double)INT_MAX / 1000)
 				{
 					dprintf(STDERR_FILENO, "%s: bad timing interval\n",
 						av[0]);
