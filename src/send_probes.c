@@ -179,6 +179,8 @@ void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghd
 		perror("sendto");
 		free_and_exit_failure();
 	}
+	if (g_global_data.opt & OPT_FLOOD)
+		printf(".");
 	if (g_global_data.packets_transmitted == 1)
 		printf("PING %s (%s) %ld(%ld) bytes of data.\n",
 		g_global_data.canonname, g_global_data.dst_ip.str4,
@@ -218,8 +220,11 @@ void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghd
 				perror("ft_ping: gettimeofday");
 			recv_time = recv_timeval.tv_sec * 1000000 + recv_timeval.tv_usec;
 			time_diff = recv_time - send_time;
-			print_received_packet_info(received_bytes, recv_timeval, time_diff,
-				msghdr);
+			if (g_global_data.opt & OPT_FLOOD)
+				printf("\b");
+			else
+				print_received_packet_info(received_bytes, recv_timeval,
+				time_diff, msghdr);
 			//	Update min, max and average timers
 			if (time_diff > g_global_data.max_time)
 				g_global_data.max_time = time_diff;

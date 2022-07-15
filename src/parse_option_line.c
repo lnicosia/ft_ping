@@ -24,7 +24,7 @@ int		print_usage_stdin(void)
 int		print_usage_stderr(void)
 {
 	dprintf(STDERR_FILENO, "Usage: ft_ping [-aDhnqvV] [-c count] [-i interval] ");
-	dprintf(STDERR_FILENO, " [-s packetsize] [-t ttl] [--verbose] destination\n");
+	dprintf(STDERR_FILENO, "[-s packetsize] [-t ttl] [--verbose] destination\n");
 	return OPTION_ERROR;
 }
 
@@ -36,7 +36,7 @@ int		parse_ping_options(int ac, char **av)
 {
 	int			opt, option_index = 0;
 	char		*optarg = NULL;
-	const char	*optstring = "DhvVt:4i:c:s:qan";
+	const char	*optstring = "DhvVt:4i:c:s:qanf";
 	static struct option long_options[] =
 	{
 		{"audible",	no_argument,		0, 'a'},
@@ -45,6 +45,7 @@ int		parse_ping_options(int ac, char **av)
 		{"version",	no_argument,		0, 'V'},
 		{"verbose",	no_argument,		0,	0 },
 		{"quiet",	no_argument,		0, 'q'},
+		{"flood",	no_argument,		0, 'f'},
 		{"ttl",		required_argument,	0, 't'},
 		{"interval",required_argument,	0, 'i'},
 		{"count",	required_argument,	0, 'c'},
@@ -66,6 +67,9 @@ int		parse_ping_options(int ac, char **av)
 			}
 			case 'v':
 				g_global_data.opt |= OPT_V;
+				break;
+			case 'f':
+				g_global_data.opt |= OPT_FLOOD;
 				break;
 			case 'D':
 				g_global_data.opt |= OPT_PRINT_TIMESTAMP;
@@ -166,6 +170,12 @@ int		parse_ping_options(int ac, char **av)
 				g_global_data.optlen = 40;
 			g_global_data.av = av[i];
 		}
+	}
+	if (g_global_data.custom_interval == 0
+		&& g_global_data.opt & OPT_FLOOD)
+	{
+		g_global_data.interval.tv_usec = 1;
+		g_global_data.custom_interval = 1;
 	}
 	return 0;
 }
