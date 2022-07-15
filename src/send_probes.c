@@ -133,7 +133,7 @@ void	print_received_packet_info(ssize_t received_bytes,
 			ip->ip_ttl);
 		if ((size_t)received_bytes - IP_HEADER_SIZE != g_global_data.icmp_packet_size)
 			printf("(truncated)");
-		else
+		else if ((size_t)received_bytes - IP_HEADER_SIZE >= 24)
 			printf("time=%.2f ms",
 				(double)(time_diff) / 1000.0);
 		if (g_global_data.opt & OPT_AUDIBLE)
@@ -154,6 +154,18 @@ void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghd
 	//	Set out packet data
 	if (g_global_data.custom_interval == 0)
 		alarm(1);
+	else
+	{
+		struct itimerval timer;
+		timer.it_interval.tv_sec = 0;
+		timer.it_interval.tv_usec = 0;
+		timer.it_value = g_global_data.interval;
+		if (setitimer(ITIMER_REAL, &timer, NULL))
+		{
+			perror("ping: setitimer");
+			free_and_exit_failure();
+		}
+	}
 	set_out_packet_data(out_packet);
 	send_time = get_time();
 	if (g_global_data.opt & OPT_VERBOSE)
@@ -174,10 +186,7 @@ void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghd
 			g_global_data.opt & OPT_MULTIPLE_ADDR ?
 				g_global_data.ip_packet_size + 40 : g_global_data.ip_packet_size);
 	g_global_data.last_probe = get_time();
-	//	If recvmsg was interrupted by a too fast SIGALARM, relaunch it
-	while ((received_bytes = recvmsg(g_global_data.sckt, msghdr, 0)) == -1
-		&& errno == EINTR)
-		continue;
+	received_bytes = recvmsg(g_global_data.sckt, msghdr, 0);
 	if (received_bytes == -1)
 	{
 		if (g_global_data.opt & OPT_VERBOSE)
@@ -241,20 +250,6 @@ int	send_probes(void)
 	msghdr.msg_iov = &iov;
 	msghdr.msg_iovlen = 1;
 	g_global_data.start_time = get_time();
-
-	//	If -i was given, use this instead of alarm() to
-	//	set timers < 1sec
-	if (g_global_data.custom_interval == 1)
-	{
-		struct itimerval timer;
-		timer.it_interval = g_global_data.interval;
-		timer.it_value = g_global_data.interval;
-		if (setitimer(ITIMER_REAL, &timer, NULL))
-		{
-			perror("ping: setitimer");
-			return 2;
-		}
-	}
 
 	unsigned int count = 0;
 	//	Send out_packets while we can

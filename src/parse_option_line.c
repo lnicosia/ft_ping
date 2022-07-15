@@ -92,11 +92,11 @@ int		parse_ping_options(int ac, char **av)
 					return OPTION_ERROR;
 				}
 				//if (packetsize > 65507)
-				if (packetsize > 3336)
+				if (packetsize > 3240)
 				{
 					dprintf(STDERR_FILENO, "%s: packet size %lld is too large.",
 						av[0], packetsize);
-					dprintf(STDERR_FILENO, " Maximum is 65507\n");
+					dprintf(STDERR_FILENO, " Maximum is 3240\n");
 					return OPTION_ERROR;
 				}
 				g_global_data.payload_size = (size_t)packetsize;
