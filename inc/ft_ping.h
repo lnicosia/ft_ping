@@ -49,6 +49,7 @@ typedef struct				s_global_data
 	int						sckt;
 	int						custom_interval;
 	int						direct_ip;
+	int						optlen;
 	unsigned int			count;
 	volatile sig_atomic_t	interrupt_flag;
 	volatile sig_atomic_t	alarm_flag;
@@ -56,7 +57,7 @@ typedef struct				s_global_data
 	uint16_t				packets_transmitted;
 	uint16_t				packets_received;
 	uint16_t				id;
-	char					padding[6];
+	char					padding[2];
 }							t_global_data;
 
 EXTERN t_global_data		g_global_data;

@@ -163,7 +163,7 @@ int		parse_ping_options(int ac, char **av)
 		if (!is_arg_an_opt(av, i, optstring, long_options))
 		{
 			if (g_global_data.av != 0)
-				g_global_data.opt |= OPT_MULTIPLE_ADDR;
+				g_global_data.optlen = 40;
 			g_global_data.av = av[i];
 		}
 	}

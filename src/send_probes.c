@@ -181,9 +181,9 @@ void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghd
 	}
 	if (g_global_data.packets_transmitted == 1)
 		printf("PING %s (%s) %ld(%ld) bytes of data.\n",
-		g_global_data.canonname, g_global_data.dst_ip.str4, g_global_data.payload_size, 
-			g_global_data.opt & OPT_MULTIPLE_ADDR ?
-				g_global_data.ip_packet_size + 40 : g_global_data.ip_packet_size);
+		g_global_data.canonname, g_global_data.dst_ip.str4,
+		g_global_data.payload_size, 
+		g_global_data.ip_packet_size + (size_t)g_global_data.optlen);
 	g_global_data.last_probe = get_time();
 	while (1)
 	{
