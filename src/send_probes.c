@@ -249,6 +249,8 @@ int	send_probes(void)
 {
 	struct msghdr		msghdr;	
 	struct iovec		iov;
+	suseconds_t			start_time;
+	suseconds_t			current_time;
 
 	g_global_data.out_packet.payload =
 		(char*)malloc(g_global_data.payload_size);
@@ -266,13 +268,15 @@ int	send_probes(void)
 	msghdr.msg_iovlen = 1;
 	g_global_data.start_time = get_time();
 
+	start_time = get_time();
+	int first = 1;
 	unsigned int count = 0;
 	//	Send out_packets while we can
-	while (g_global_data.count == 0 ||
-		count < g_global_data.count)
+	while (1)
 	{
 		//	Interrupt signal -> print stats, close socket and exit
-		if (g_global_data.interrupt_flag == 1)
+		if (g_global_data.interrupt_flag == 1
+			|| (g_global_data.count != 0 && count >= g_global_data.count))
 		{
 			break ;
 		}
@@ -285,10 +289,15 @@ int	send_probes(void)
 		//	Alarm signal -> send a new echo and wait for an answer
 		if (g_global_data.alarm_flag == 1)
 		{
+			current_time = get_time();
+			if (g_global_data.deadline != 0 && first != 1
+				&& (current_time - start_time) / 1000000 >= g_global_data.deadline)
+				break;
 			g_global_data.alarm_flag = 0;
 			send_and_receive_probe(&g_global_data.out_packet, &msghdr);
 			count++;
 		}
+		first = 0;
 	}
 	print_final_statistics();
 	return 0;

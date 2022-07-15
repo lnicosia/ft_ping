@@ -16,15 +16,17 @@ int		print_version(void)
 
 int		print_usage_stdin(void)
 {
-	printf("Usage: ft_ping [-aDhnqvV] [-c count] [-i interval] [-s packetsize]");
-	printf(" [-t ttl] [--verbose] destination\n");
+	printf("Usage: ft_ping [-aDfhnqvV] [-c count] [-i interval] [-s packetsize]\n");
+	printf("               [-t ttl] [--verbose] [-w deadline] destination\n");
 	return OPTION_ERROR;
 }
 
 int		print_usage_stderr(void)
 {
-	dprintf(STDERR_FILENO, "Usage: ft_ping [-aDhnqvV] [-c count] [-i interval] ");
-	dprintf(STDERR_FILENO, "[-s packetsize] [-t ttl] [--verbose] destination\n");
+	dprintf(STDERR_FILENO, "Usage: ft_ping [-aDfhnqvV] [-c count] " \
+		"[-i interval] [-s packetsize]\n");
+	dprintf(STDERR_FILENO, "               [-t ttl] [--verbose] " \
+		"[-w deadline] destination\n");
 	return OPTION_ERROR;
 }
 
@@ -36,7 +38,7 @@ int		parse_ping_options(int ac, char **av)
 {
 	int			opt, option_index = 0;
 	char		*optarg = NULL;
-	const char	*optstring = "DhvVt:4i:c:s:qanf";
+	const char	*optstring = "DhvVt:4i:c:s:qanfw:";
 	static struct option long_options[] =
 	{
 		{"audible",	no_argument,		0, 'a'},
@@ -50,6 +52,7 @@ int		parse_ping_options(int ac, char **av)
 		{"interval",required_argument,	0, 'i'},
 		{"count",	required_argument,	0, 'c'},
 		{"size",	required_argument,	0, 's'},
+		{"deadline",required_argument,	0, 'w'},
 		{0,			0,					0,	0 }
 	};
 
@@ -132,6 +135,16 @@ int		parse_ping_options(int ac, char **av)
 					return OPTION_ERROR;
 				}
 				g_global_data.count = (unsigned int)count;
+				break;
+			}
+			case 'w':
+			{
+				g_global_data.deadline = ft_atoll(optarg);
+				if (g_global_data.deadline < 0 || g_global_data.deadline > INT_MAX)
+				{
+					dprintf(STDERR_FILENO, "%s: bad wait time.\n", av[0]);
+					return OPTION_ERROR;
+				}
 				break;
 			}
 			case 'i':

@@ -46,6 +46,7 @@ typedef struct				s_global_data
 	suseconds_t				time_sum;
 	suseconds_t				square_sum;
 	double					ewma;
+	long long				deadline;
 	int						sckt;
 	int						custom_interval;
 	int						direct_ip;
