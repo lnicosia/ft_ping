@@ -36,7 +36,7 @@ void	print_statistics(void)
 
 void	print_final_statistics(void)
 {
-	printf("\n--- %s ping statistics ---\n", g_global_data.av);
+	printf("\n--- %s ping statistics ---\n", g_global_data.canonname);
 	printf("%u packets transmitted, %u received,",
 		g_global_data.packets_transmitted,
 		g_global_data.packets_received);
@@ -110,14 +110,13 @@ void	print_received_packet_info(ssize_t received_bytes,
 	else
 	{
 		char	host[512];
-		char	serv[512];
 		struct sockaddr_in addr;
 		addr.sin_family = AF_INET;
 		addr.sin_port = 0;
 		addr.sin_addr = ip->ip_src;
 		struct sockaddr *final_addr = (struct sockaddr*)&addr;
 		if (getnameinfo(final_addr, sizeof(addr), host, sizeof(host),
-			serv, sizeof(serv), 0))
+			NULL, 0, 0))
 		{
 			perror("ft_ping: getnameinfo");
 		}
@@ -182,7 +181,7 @@ void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghd
 	}
 	if (g_global_data.packets_transmitted == 1)
 		printf("PING %s (%s) %ld(%ld) bytes of data.\n",
-		g_global_data.av, g_global_data.dst_ip.str4, g_global_data.payload_size, 
+		g_global_data.canonname, g_global_data.dst_ip.str4, g_global_data.payload_size, 
 			g_global_data.opt & OPT_MULTIPLE_ADDR ?
 				g_global_data.ip_packet_size + 40 : g_global_data.ip_packet_size);
 	g_global_data.last_probe = get_time();

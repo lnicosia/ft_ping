@@ -19,14 +19,13 @@ void	print_response_error(ssize_t received_bytes,
 	inet_ntop(AF_INET, addr, buff, INET6_ADDRSTRLEN);
 
 	char	host[512];
-	char	serv[512];
 	struct sockaddr_in in_addr;
 	in_addr.sin_family = AF_INET;
 	in_addr.sin_port = 0;
 	in_addr.sin_addr = ip->ip_src;
 	struct sockaddr *final_addr = (struct sockaddr*)&in_addr;
 	if (getnameinfo(final_addr, sizeof(in_addr), host, sizeof(host),
-		serv, sizeof(serv), 0))
+		NULL, 0, 0))
 	{
 		perror("ft_ping: getnameinfo");
 	}

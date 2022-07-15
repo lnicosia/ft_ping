@@ -38,6 +38,7 @@ typedef struct				s_global_data
 	struct timeval			interval;
 	struct icmp_packet		out_packet;
 	char					*in_packet;
+	char					*canonname;
 	suseconds_t				start_time;
 	suseconds_t				last_probe;
 	suseconds_t				min_time;

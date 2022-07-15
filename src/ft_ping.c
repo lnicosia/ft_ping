@@ -91,7 +91,6 @@ int	ft_ping(int ac, char **av)
 		dprintf(STDERR_FILENO, "Unable to find system's hostname\n");
 		return -1;
 	}
-	g_global_data.src_ip = resolve_hostname(src_ip_name);
 	g_global_data.dst_ip = resolve_hostname(g_global_data.av);
 	//	If it is a direct IP, do not try to resolve when receiving packets
 	if (ft_strequ(g_global_data.dst_ip.str4, g_global_data.av)

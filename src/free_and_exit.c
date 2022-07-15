@@ -8,6 +8,8 @@ void	free_all(void)
 		ft_memdel((void**)&g_global_data.out_packet.payload);
 	if (g_global_data.in_packet != NULL)
 		ft_memdel((void**)&g_global_data.in_packet);
+	if (g_global_data.canonname != NULL)
+		ft_strdel(&g_global_data.canonname);
 	close(g_global_data.sckt);
 }
 

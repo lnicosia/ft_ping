@@ -61,13 +61,19 @@ t_ip		resolve_hostname(char *hostname)
 	struct addrinfo hints;
 	ft_bzero(&hints, sizeof(hints));
 	ai = NULL;
-	hints.ai_family = AF_UNSPEC;
+	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_RAW;
+	hints.ai_flags = AI_CANONNAME;
 	ft_bzero(&res, sizeof(res));
 	if ((ret = getaddrinfo(hostname, NULL, &hints, &ai)))
 	{
 		dprintf(STDERR_FILENO, "ft_ping: %s: %s\n",
 			hostname, gai_strerror(ret));
+		free_and_exit_failure();
+	}
+	if (!(g_global_data.canonname = ft_strdup(ai->ai_canonname)))
+	{
+		perror("ft_ping: ft_strdup");
 		free_and_exit_failure();
 	}
 	struct addrinfo *tmp = ai;
@@ -83,6 +89,7 @@ t_ip		resolve_hostname(char *hostname)
 			ft_memcpy(&res.ip4, ip4, sizeof(*ip4));
 			inet_ntop(tmp->ai_family, addr, res.str4, INET_ADDRSTRLEN);
 			//printf("IP4 = %s\n", res.str4);
+			break;
 		}
 		else if (tmp->ai_family == AF_INET6)
 		{
