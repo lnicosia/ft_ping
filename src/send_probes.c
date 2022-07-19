@@ -82,7 +82,7 @@ void	set_out_packet_data(struct icmp_packet* out_packet)
 	//	Update sequence (= received packets count) and checksum
 	out_packet->header.un.echo.sequence = ++g_global_data.packets_transmitted;
 	out_packet->header.checksum = checksum(out_packet,
-		g_global_data.icmp_packet_size);
+		(int)g_global_data.icmp_packet_size);
 }
 
 /**	Print received packet info: size, ip, etc
