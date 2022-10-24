@@ -40,9 +40,9 @@ LIB_RAW =
 
 SRC_RAW =	main.c ft_ping.c parse_option_line.c resolve_hostname.c \
 			send_probes.c sighandlers.c ft_gethostname.c \
-			free_and_exit.c time_utils.c print_packet.c print_response_error.c \
+			free_and_exit.c print_response_error.c \
 
-HEADERS =	options.h ft_ping.h ip.h send_probes.h sighandlers.h time_utils.h 
+HEADERS =	options.h ft_ping.h ip.h send_probes.h sighandlers.h
 
 #
 # Creation of files path

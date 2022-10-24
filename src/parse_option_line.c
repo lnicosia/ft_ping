@@ -139,12 +139,13 @@ int		parse_ping_options(int ac, char **av)
 			}
 			case 'w':
 			{
-				g_global_data.deadline = ft_atoll(optarg);
-				if (g_global_data.deadline < 0 || g_global_data.deadline > INT_MAX)
+				long long deadline = ft_atoll(optarg);
+				if (deadline < 0 || deadline > INT_MAX)
 				{
 					dprintf(STDERR_FILENO, "%s: bad wait time.\n", av[0]);
 					return OPTION_ERROR;
 				}
+				g_global_data.deadline = (uint64_t)deadline;
 				break;
 			}
 			case 'i':

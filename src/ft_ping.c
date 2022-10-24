@@ -3,7 +3,6 @@
 #include "send_probes.h"
 #include "ft_ping.h"
 #include "sighandlers.h"
-#include "time_utils.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

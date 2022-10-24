@@ -3,11 +3,11 @@
 #include "ip.h"
 #include "options.h"
 #include "send_probes.h"
-#include "time_utils.h"
 #include <netinet/ip.h>
 #include <stdio.h>
 #include <errno.h>
 #include <netdb.h>
+#include <sys/time.h>
 
 /**	Print ping statistics after a SIGQUIT
 */
@@ -44,7 +44,7 @@ void	print_final_statistics(void)
 		/ (double)g_global_data.packets_transmitted;
 	if (g_global_data.errors > 0)
 		printf(" +%ld errors,", g_global_data.errors);
-	suseconds_t	diff = g_global_data.last_probe - g_global_data.start_time;
+	uint64_t	diff = g_global_data.last_probe - g_global_data.start_time;
 	printf(" %.f%% packet loss, time %ldms\n",
 		100 - (100 * packet_ratio), diff / 1000);
 	double avg = (double)g_global_data.time_sum
@@ -89,7 +89,7 @@ void	set_out_packet_data(struct icmp_packet* out_packet)
 */
 
 void	print_received_packet_info(ssize_t received_bytes,
-	struct timeval current_time, suseconds_t time_diff, struct msghdr *msghdr)
+	struct timeval current_time, uint64_t time_diff, struct msghdr *msghdr)
 {
 	struct ip *ip = (struct ip*)msghdr->msg_iov->iov_base;
 	struct icmphdr *icmphdr = (struct icmphdr*)(msghdr->msg_iov->iov_base
@@ -144,9 +144,9 @@ void	print_received_packet_info(ssize_t received_bytes,
 
 void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghdr)
 {
-	suseconds_t		send_time;
-	suseconds_t		recv_time;
-	suseconds_t		time_diff;
+	uint64_t		send_time;
+	uint64_t		recv_time;
+	uint64_t		time_diff;
 	struct timeval	recv_timeval;
 	ssize_t			received_bytes;
 
@@ -218,7 +218,7 @@ void	send_and_receive_probe(struct icmp_packet *out_packet, struct msghdr *msghd
 			//	Get the time manually because option -D needs it
 			if (gettimeofday(&recv_timeval, NULL) == -1)
 				perror("ft_ping: gettimeofday");
-			recv_time = recv_timeval.tv_sec * 1000000 + recv_timeval.tv_usec;
+			recv_time = (uint64_t)recv_timeval.tv_sec * 1000000 + (uint64_t)recv_timeval.tv_usec;
 			time_diff = recv_time - send_time;
 			if (g_global_data.opt & OPT_FLOOD)
 				printf("\b");
@@ -249,8 +249,8 @@ int	send_probes(void)
 {
 	struct msghdr		msghdr;	
 	struct iovec		iov;
-	suseconds_t			start_time;
-	suseconds_t			current_time;
+	uint64_t			start_time;
+	uint64_t			current_time;
 
 	g_global_data.out_packet.payload =
 		(char*)malloc(g_global_data.payload_size);
