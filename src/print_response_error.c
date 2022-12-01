@@ -83,6 +83,7 @@ void	print_msg(int type, int code)
 					printf("Redirect Type of Service and Host");
 					break;
 			}
+			break;
 		case ICMP_ECHO:
 			printf("Echo Request\n");
 			break;
@@ -96,6 +97,7 @@ void	print_msg(int type, int code)
 					printf("Frag reassembly time exceeded\n");
 					break;
 			}
+			break;
 		case ICMP_PARAMETERPROB:
 			printf("Parameter problem\n");
 			break;

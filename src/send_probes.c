@@ -16,7 +16,7 @@ void	print_statistics(void)
 {
 	double	packet_ratio = (double)g_global_data.packets_received
 		/ (double)g_global_data.packets_transmitted;
-	printf("%d/%d packets, %.f%% loss", g_global_data.packets_received,
+	printf("\r%d/%d packets, %.f%% loss", g_global_data.packets_received,
 		g_global_data.packets_transmitted, 100 - (100 * packet_ratio));
 	if (g_global_data.packets_received == 0)
 	{
